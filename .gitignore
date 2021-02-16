@@ -1,0 +1,21 @@
+# Configuration files
+config.json
+config*.json
+
+# Python compiled code
+__pycache__
+build
+dist
+docs_build
+*.egg-info
+
+# Development environment
+.env
+.vscode
+.coverage
+htmlcov
+
+# Utility artifact files
+*.csv
+*.log
+*.db

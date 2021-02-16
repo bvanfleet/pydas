@@ -1,0 +1,800 @@
+swagger: "2.0"
+info:
+  description: "API for accessing and interacting with sDAS utility and metadata."
+  version: "1.0.0"
+  title: "stock Data Acquisition Service (sDAS) API"
+host: "localhost:5000"
+basePath: "/api/v1"
+tags:
+  - name: "acquire"
+    description: "Communication pipeline to retrieve data at runtime"
+  - name: "configuration"
+    description: "sDAS configuration attributes that controls system functionality"
+  - name: "companies"
+    description: "Companies that can have data acquired for"
+  - name: "company features"
+    description: "Company/Feature mapping for controlling what data is acquired"
+  - name: "features"
+    description: "Features that controls what data is acquired for a company"
+  - name: "handlers"
+    description: "Feature handler extensibility for how the data is acquired"
+  - name: "options"
+    description: "Feature options that add extra configuration for data acquisition"
+  - name: "statistics"
+    description: "sDAS system statistics of data acquired"
+schemes:
+  - "http"
+securityDefinitions:
+  AuthorizationHeader:
+    type: apiKey
+    in: header
+    name: Authorization
+security:
+  - AuthorizationHeader: []
+paths:
+  /acquire/{company_symbol}:
+    get:
+      tags:
+        - "acquire"
+      summary: "Retrieves data for a given company and its features"
+      description: ""
+      operationId: "getAcquire"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Company symbol to retrieve stock data for"
+          required: true
+          type: string
+        - name: "format"
+          in: "query"
+          description: "Output format of acquired data"
+          type: string
+      responses:
+        200:
+          description: "Data retrieval was successful"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Invalid company_symbol"
+  /configuration:
+    get:
+      tags:
+        - "configuration"
+      summary: "Retrieves all sDAS configuration attributes"
+      description: ""
+      operationId: "getConfigurations"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of configuration attributes for the system"
+  /configuration/{configuration_name}:
+    get:
+      tags:
+        - "configuration"
+      summary: "Retrieves a single registered feature"
+      description: ""
+      operationId: "getConfiguration"
+      parameters:
+        - name: "configuration_name"
+          in: "path"
+          description: "Name of configuration to return"
+          required: true
+          type: string
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Configuration attribute for the system with a matching name"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Configuration attribute not found"
+    patch:
+      tags:
+        - "configuration"
+      summary: "Update an existing configuration attribute"
+      description: ""
+      operationId: "updateConfiguration"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "configuration_name"
+          in: "path"
+          description: "Name of the configuration attribute to update"
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Configuration attribute to update in the system"
+          required: true
+          schema:
+            $ref: "#/definitions/Configuration"
+      responses:
+        200:
+          description: "Updated configuration attribute"
+        400:
+          description: "Invalid configuration attribute supplied"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Configuration attribute not found"
+  /companies:
+    get:
+      tags:
+        - "companies"
+      summary: "Retrieves all registered companies"
+      description: ""
+      operationId: "getCompanies"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of company objects registered in the system"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+    post:
+      tags:
+        - "companies"
+      summary: "Register a new company in the system"
+      description: ""
+      operationId: "addCompany"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Company object that needs to be registered"
+          required: true
+          schema:
+            $ref: "#/definitions/Company"
+      responses:
+        201:
+          description: "Newly registered company"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /companies/{company_symbol}:
+    get:
+      tags:
+        - "companies"
+      summary: "Retrieves a single registered company"
+      description: ""
+      operationId: "getCompany"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to return"
+          required: true
+          type: string
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Company object registered in the system with a matching symbol"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company not found"
+    patch:
+      tags:
+        - "companies"
+      summary: "Update an existing company registry"
+      description: ""
+      operationId: "updateCompany"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to update"
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Company object to update in the system"
+          required: true
+          schema:
+            $ref: "#/definitions/Company"
+      responses:
+        200:
+          description: "Updated company object"
+        400:
+          description: "Invalid company object supplied"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company not found"
+    delete:
+      tags:
+        - "companies"
+      summary: "Deletes a company"
+      description: ""
+      operationId: "deleteCompany"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to delete"
+          required: true
+          type: string
+      responses:
+        204:
+          description: "Company successfully deleted"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company not found"
+  /companies/{company_symbol}/features:
+    get:
+      tags:
+        - "company features"
+      summary: "Retrieves all features mapped to the company"
+      description: ""
+      operationId: "getCompanyFeatures"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to retrieve features for"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Array of features mapped to the registered company"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company not found"
+    post:
+      tags:
+        - "company features"
+      summary: "Maps a feature to a registered company in the system"
+      description: ""
+      operationId: "addCompanyFeature"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to retrieve features for"
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Feature object that needs to be registered"
+          required: true
+          schema:
+            $ref: "#/definitions/Feature"
+      responses:
+        201:
+          description: "Newly registered feature"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /companies/{company_symbol}/features/{feature_name}:
+    get:
+      tags:
+        - "company features"
+      summary: "Retrieves a single registered feature"
+      description: ""
+      operationId: "getCompanyFeature"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to retrieve features for"
+          required: true
+          type: string
+        - name: "feature_name"
+          in: "path"
+          description: "Name of feature to return"
+          required: true
+          type: string
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Feature object registered in the system with a matching name"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company or feature not found"
+    patch:
+      tags:
+        - "company features"
+      summary: "Update an existing feature registry"
+      description: ""
+      operationId: "updateCompanyFeature"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to retrieve features for"
+          required: true
+          type: string
+        - name: "feature_name"
+          in: "path"
+          description: "Name of feature to update"
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Feature object to update in the system"
+          required: true
+          schema:
+            $ref: "#/definitions/Feature"
+      responses:
+        200:
+          description: "Updated feature object"
+        400:
+          description: "Invalid feature object supplied"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company or feature not found"
+    delete:
+      tags:
+        - "company features"
+      summary: "Deletes a feature"
+      description: ""
+      operationId: "deleteCompanyFeature"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Symbol of company to retrieve features for"
+          required: true
+          type: string
+        - name: "feature_name"
+          in: "path"
+          description: "Name of feature to delete"
+          required: true
+          type: string
+      responses:
+        204:
+          description: "Feature successfully deleted"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Company or feature not found"
+  /features:
+    get:
+      tags:
+        - "features"
+      summary: "Retrieves all registered features"
+      description: ""
+      operationId: "getFeatures"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of feature objects registered in the system"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+    post:
+      tags:
+        - "features"
+      summary: "Registers a new feature in the system"
+      description: ""
+      operationId: "addFeature"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Feature object that needs to be registered"
+          required: true
+          schema:
+            $ref: "#/definitions/Feature"
+      responses:
+        201:
+          description: "Newly registered feature"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /features/{feature_name}:
+    get:
+      tags:
+        - "features"
+      summary: "Retrieves a single registered feature"
+      description: ""
+      operationId: "getFeature"
+      parameters:
+        - name: "feature_name"
+          in: "path"
+          description: "Name of feature to return"
+          required: true
+          type: string
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Feature object registered in the system with a matching name"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Feature not found"
+    patch:
+      tags:
+        - "features"
+      summary: "Update an existing feature registry"
+      description: ""
+      operationId: "updateFeature"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "feature_name"
+          in: "path"
+          description: "Name of feature to update"
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "feature object to update in the system"
+          required: true
+          schema:
+            $ref: "#/definitions/Feature"
+      responses:
+        200:
+          description: "Updated feature object"
+        400:
+          description: "Invalid feature object supplied"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Feature not found"
+    delete:
+      tags:
+        - "features"
+      summary: "Deletes a feature"
+      description: ""
+      operationId: "deleteFeature"
+      parameters:
+        - name: "feature_name"
+          in: "path"
+          description: "Name of feature to delete"
+          required: true
+          type: string
+      responses:
+        204:
+          description: "Feature successfully deleted"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Feature not found"
+  /handlers:
+    get:
+      tags:
+        - "handlers"
+      summary: "Retrieves all registered handlers"
+      description: ""
+      operationId: "getHandlers"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of handlers registered in the system"
+  /options:
+    get:
+      tags:
+        - "options"
+      summary: "Retrieves all feature-option attributes"
+      description: ""
+      operationId: "getAllOptions"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of option attributes in the system"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+    post:
+      tags:
+        - "options"
+      summary: "Registers a new feature-option attribute in the system"
+      description: ""
+      operationId: "addOption"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Feature object that needs to be registered"
+          required: true
+          schema:
+            $ref: "#/definitions/Option"
+      responses:
+        201:
+          description: "Newly registered option"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /options/{option_name}:
+    get:
+      tags:
+        - "options"
+      summary: "Retrieves a single registered feature"
+      description: ""
+      operationId: "getOption"
+      parameters:
+        - name: "option_name"
+          in: "path"
+          description: "Name of option to return"
+          required: true
+          type: string
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of option attributes with a matching option name"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+        404:
+          description: "Option not found"
+  /statistics:
+    get:
+      tags:
+        - "statistics"
+      summary: "Retrieves all system statistics"
+      description: ""
+      operationId: "getStatistics"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Array of statistics in the system"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /statistics/company/{company_symbol}:
+    get:
+      tags:
+        - "statistics"
+      summary: "Retrieves system statistics for a given company"
+      description: ""
+      operationId: "getCompanyStatistics"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Company symbol to return statistics for"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Statistics for the given company"
+          schema:
+            $ref: "#/definitions/Statistics"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /statistics/company/{company_symbol}/features:
+    get:
+      tags:
+        - "statistics"
+      summary: "Retrieves system statistics for a given company, broken down by feature"
+      description: ""
+      operationId: "getCompanyFeaturesStatistics"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Company symbol to return statistics for"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Array of feature statistics for the given company"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+  /statistics/company/{company_symbol}/features/{feature_name}:
+    get:
+      tags:
+        - "statistics"
+      summary: "Retrieves system statistics for a given company feature"
+      description: ""
+      operationId: "getCompanyFeatureStatistics"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "company_symbol"
+          in: "path"
+          description: "Company symbol to return statistics for"
+          required: true
+          type: string
+        - name: "feature_name"
+          in: "path"
+          description: "Feature name to return statistics for"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Feature statistics for the given company"
+          schema:
+            $ref: "#/definitions/Statistics"
+        401:
+          description: "Invalid or null Authorization header (apiKey)"
+        403:
+          description: "User is not authorized to access this data"
+
+definitions:
+  Configuration:
+    type: object
+    description: "sDAS functionality attributes"
+    required:
+      - "name"
+      - "type"
+    properties:
+      id:
+        type: integer
+        format: int32
+      name:
+        type: string
+        example: "outputFormat"
+      type:
+        type: string
+        description: "Data type of the configuration attribute"
+        example: string
+      value_text:
+        type: string
+        example: "File"
+      value_number:
+        type: number
+        format: float
+  Company:
+    type: object
+    description: "Organization to acquire data about"
+    required:
+      - "symbol"
+      - "name"
+      - "market"
+    properties:
+      symbol:
+        type: string
+        example: "GOOGL"
+      name:
+        type: string
+        example: "Alphabet, inc"
+      market:
+        type: string
+        example: "technology"
+  Feature:
+    type: object
+    description: "Metadata for controlling where and how to acquire data"
+    required:
+      - "name"
+      - "uri"
+      - "handler"
+    properties:
+      name:
+        type: string
+        example: "open"
+      uri:
+        type: string
+        description: "third-party API endpoint to acquire the data from"
+        example: "/stock/{:symbol}/chart"
+      description:
+        type: string
+        example: "Price of stock at start of trading day"
+      handler:
+        $ref: "#/definitions/Handler"
+  Handler:
+    type: object
+    description: "Extensible function for acquiring data from third-party"
+    required:
+      - "id"
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: 1
+      name:
+        type: string
+        description: "Function name to call to acquire data"
+        example: "batch_handler"
+  Option:
+    type: object
+    description: "Additional configuration attribute for a mapped feature"
+    properties:
+      name:
+        type: string
+      company_symbol:
+        type: string
+      feature_name:
+        type: string
+      type:
+        type: string
+        description: "Data type of the option"
+      value_text:
+        type: string
+      value_number:
+        type: number
+        format: float
+  Statistics:
+    type: object
+    required:
+      - "company_symbol"
+      - "total_row_count"
+    properties:
+      company_symbol:
+        type: string
+        example: "GOOGL"
+      feature_name:
+        type: string
+        example: "open"
+      retrieval_datetime:
+        type: string
+        format: date-time
+      total_row_count:
+        type: integer
+        format: int32
