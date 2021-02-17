@@ -58,7 +58,7 @@ class Feature(Base):
         """
         # TODO: Determine if there's a way we can remove this coupling by making
         # the handler_path configurable
-        handlers = importlib.import_module('sdas.handlers')
+        handlers = importlib.import_module('pydas.transformers')
         return getattr(handlers, self.handler_metadata.name)
 
     def get_value(self, data: dict) -> tuple:

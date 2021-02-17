@@ -21,7 +21,7 @@ Using wheel you'll first want to download the [latest release](https://github.co
 Once the installation has been completed, you'll want to run the installer to setup the database. The installer can be found within the sDAS package and can be run by calling:
 
 ```shell
-(env) $> python -m sdas.install -h
+(env) $> python -m pydas.install -h
 usage: install.py [-h] [-a ALEMBIC] [-r REQUIREMENTS] [-u USERNAME]
                   [-p PASSWORD] [-d DATABASE] [--deploy-rest]
 

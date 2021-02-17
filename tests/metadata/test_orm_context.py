@@ -8,7 +8,7 @@ class TestOrmContext(unittest.TestCase):
 
     def test_can_connect(self):
         # arrange
-        context = DatabaseContext('sdasadmin', 'root')
+        context = DatabaseContext('pydasadmin', 'root')
         session_factory = context.get_session_maker()
 
         # act

@@ -13,7 +13,7 @@ class Handler(Base):
 
     name: str
         Name of the function tracked by the handler object. This name must match
-        the name of a function tracked in the `sdas.handlers` module.
+        the name of a function tracked in the `pydas.handlers` module.
     """
     __tablename__ = 'HandlerBASE'
 

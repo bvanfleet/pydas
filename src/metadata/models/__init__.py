@@ -1,4 +1,4 @@
-'''Database models defined for ORM usage in the sdas application domain.'''
+'''Database models defined for ORM usage in the pydas application domain.'''
 
 from .archive import Archive
 from .base import Base
