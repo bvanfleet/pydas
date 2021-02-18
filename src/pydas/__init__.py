@@ -1,5 +1,5 @@
 '''
-The stock Data Acquisition Service (sDAS) package contains the modules
+The python Data Acquisition Service (pyDAS) package contains the modules
 necessary for performing data acquisition and dataset generation.
 '''
 from flask import Flask, url_for, redirect
@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 from sqlalchemy.exc import OperationalError
 
-from pydas.config import ProductionConfig, setup_logging
+from pydas.config import Config
 from pydas.handlers import handle_base_server_error
 from pydas.handlers import handle_database_error
 from pydas.routes import (acquire_bp,
@@ -22,11 +22,11 @@ from pydas.routes import (acquire_bp,
 from pydas.routes.swagger import SWAGGER_URL
 from pydas.signals import SignalFactory
 
-setup_logging()
+Config.setup_logging('pydas.ini')
 
 app = Flask(__name__)
 app.logger.info("Starting sDAS API app")  # pylint: disable=no-member
-app.config.from_object(ProductionConfig())
+app.config.from_object(Config('pydas.ini'))
 CORS(app)
 
 try:

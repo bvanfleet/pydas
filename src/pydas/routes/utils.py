@@ -1,19 +1,20 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from firebase_admin import auth
 
-from metadata.contexts import DatabaseContext
+from metadata.contexts import ContextFactory
 
 cred = credentials.Certificate('credentials.json')
 firebase_admin.initialize_app(cred)
 
 
 def get_session():
-    context = DatabaseContext('sDASadmin', 'bradley.vanfleet')
+    context = ContextFactory.get_context(current_app.config['DB_DIALECT'],
+                                         **current_app.config['DB_CONFIG'])
     session_maker = context.get_session_maker()
     return session_maker()
 

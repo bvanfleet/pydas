@@ -21,8 +21,8 @@ class MemoryContext(BaseContext):
     initializes the in-memory database.
     """
 
-    def __init__(self, db_path: str = None):
-        connection_path = db_path if db_path is not None else ':memory:'
+    def __init__(self, database: str = None):
+        connection_path = database if database is not None else ':memory:'
         self.engine = create_engine(f'sqlite:///{connection_path}')
 
     def get_session_maker(self):
