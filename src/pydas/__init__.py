@@ -30,11 +30,13 @@ app.config.from_object(Config('pydas.ini'))
 CORS(app)
 
 try:
-    SignalFactory.register_signals()
+    with app.app_context():
+        SignalFactory.register_signals()
 except RuntimeError as exc:
     # pylint: disable=no-member
     app.logger.warning(
-        'Unable to register signals, please check that blinker is installed')
+        'Unable to register signals, please check that blinker is installed: %s',
+        exc)
 
 # Route registrations
 app.register_blueprint(feature_bp)

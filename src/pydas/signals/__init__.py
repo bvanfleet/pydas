@@ -50,6 +50,9 @@ class SignalFactory:
         session = get_session()
         signals: List[EventHandler] = session.query(EventHandler).all()
         for signal in signals:
+            if not signal.is_enabled:
+                continue
+
             logging.debug('Registering signal: %s', signal.name)
             try:
                 cls.__map_signal(signal)
@@ -61,7 +64,7 @@ class SignalFactory:
                 logging.warning(exc)
                 continue
 
-            logging.debug('Registered signal: %s', signal.name)
+            logging.info('Registered signal: %s', signal.name)
             cls.signals.append(signal)
 
         logging.debug('Signals registered!')

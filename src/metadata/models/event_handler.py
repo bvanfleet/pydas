@@ -2,7 +2,7 @@ import importlib
 import logging
 from typing import Callable
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 
 from metadata.models.base import Base
 
@@ -39,6 +39,10 @@ class EventHandler(Base):
     description: str = Column('HandlerDSC', String(255), nullable=True)
     path: str = Column('HandlerPathTXT', String(255), nullable=False)
     type: str = Column('HandlerTypeCD', String(15), nullable=False)
+    is_enabled: bool = Column('IsEnabled',
+                              Boolean,
+                              nullable=False,
+                              default=False)
 
     @property
     def function(self) -> Callable:
