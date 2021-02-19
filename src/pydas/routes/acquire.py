@@ -14,7 +14,6 @@ from pydas.routes.utils import get_session, verify_scopes
 from pydas.signals import SignalFactory
 from pydas.clients.iex import IexClient
 from pydas.constants import FeatureToggles
-from pydas.feature_mapper.feature_map import FeatureMap
 from pydas.formatters import BaseFormatter, FormatterFactory
 
 # Disable the call to current_app._get_current_object as it's recommended by Flask
@@ -98,7 +97,7 @@ def acquire(company_symbol):
                 (" ").join([json(option, True) for option in feature_option]))
 
             # TODO: Determine if this could/should be moved into source-aware code
-            if feature.name in FeatureMap.technical_indicators(session) and not option:
+            if feature.handler_meta.name == "tech_indicators_handler" and not option:
                 current_app.logger.info(
                     'Adding missing option on technical indicator')
                 option.append({"feature_name": feature.name,

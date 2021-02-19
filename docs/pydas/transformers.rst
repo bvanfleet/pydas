@@ -1,23 +1,23 @@
 Handler Functions
 =================
 
-.. automodule:: pydas.handlers
+.. automodule:: pydas.transformers
    :members:
 
 IEX Handlers
 ------------
 
-.. automodule:: pydas.handlers.iex_handlers
+.. automodule:: pydas.transformers.iex_handlers
    :members:
 
 IEX News Handlers
 ^^^^^^^^^^^^^^^^^
 
-.. automodule:: pydas.handlers.iex_news_handlers
+.. automodule:: pydas.transformers.iex_news_handlers
    :members:
 
 Utilities
 ---------
 
-.. automodule:: pydas.handlers.utils
+.. automodule:: pydas.transformers.utils
    :members:

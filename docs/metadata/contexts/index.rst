@@ -4,9 +4,9 @@ Metadata Contexts
 .. automodule:: metadata.contexts
    :members:
 
-.. inheritance-diagram:: metadata.contexts.DatabaseContext metadata.contexts.MemoryContext
-   :parts: 1
-   :top-classes: metadata.contexts.base.BaseContext
+.. image:: ContextFactoryUML.png
+   :scale: 30 %
+   :align: center
 
 .. toctree::
    :maxdepth: 5

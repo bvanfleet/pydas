@@ -21,13 +21,12 @@ class FormatterFactory:
     Attributes
     ----------
     formatters: list[BaseFormatter]
-        Collection of registered output formatters.
+        Collection of built-in output formatters.
     """
 
-    formatters: List[BaseFormatter] = [
-        CompressionFormatter,
-        FileFormatter,
-        JsonFormatter]
+    formatters: List[BaseFormatter] = [CompressionFormatter,
+                                       FileFormatter,
+                                       JsonFormatter]
 
     @classmethod
     def register_formatter(cls, formatter: BaseFormatter):

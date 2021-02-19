@@ -3,7 +3,7 @@
    because of this decision.
 
 pyDAS Developer's Documentation
-==============================
+===============================
 
 This documentation is for any developer interested in utilizing either the sDAS or metadata packages within their
 applications. The information found here assumes a basic understanding of how the sDAS functions and ETL
@@ -20,13 +20,11 @@ understand how this project is organized and find additional documentation.
    metadata/index.rst
    pydas/index.rst
 
-.. mdinclude:: ../readme.md
+.. image:: ArchitectureLayerDiagram.png
+   :scale: 40 %
+   :align: center
 
-.. note:: This documentation was developed using the `python-docs-theme <https://github.com/python/python-docs-theme/>`_
-   for sphinx. This decision comes with an element of trust, as this solution is not a part of the Python distribution,
-   but a third-party package. Any issues with this system should first be troubleshooted with the interface and data
-   engineering development team. If it is determined that the issue is with the core Python language, then an issue will
-   be created by the development team.
+.. mdinclude:: ../readme.md
 
 Indices and tables
 ==================

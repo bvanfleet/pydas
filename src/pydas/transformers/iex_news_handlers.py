@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 from pydas.constants import UtilityConstants
-from pydas.handlers import batch_handler
+from pydas.transformers import batch_handler
 
 
 # TODO: This currently is limited to only retrieving a single data point.

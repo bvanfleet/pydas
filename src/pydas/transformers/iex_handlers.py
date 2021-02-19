@@ -6,7 +6,7 @@ import logging
 import requests
 
 from pydas.constants import SdasConstants, UtilityConstants
-from pydas.handlers.utils import build_query, calc_range
+from pydas.transformers.utils import build_query, calc_range
 
 
 def batch_handler(uri: str, options: list, api_key: str) -> list:

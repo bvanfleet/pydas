@@ -11,6 +11,5 @@ sDAS Package
    api/index.rst
    ./archive.rst
    clients/index.rst
-   ./feature_mapper.rst
    formatters/index.rst
-   ./handlers.rst
+   ./transformers.rst
