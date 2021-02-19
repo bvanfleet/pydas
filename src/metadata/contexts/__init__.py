@@ -32,11 +32,9 @@ class ContextFactory:
         >>> from metadata.contexts import ContextFactory
         >>> context = ContextFactory.get_context('sqlite', database='pydas.db')
         """
-        if context_type == 'mysql':
-            return DatabaseContext(**context_config)
-
-        if context_type == 'sqlite':
-            return MemoryContext(context_config['database'])
+        for context in cls.supported_contexts:
+            if context.can_handle(context_type):
+                return context(**context_config)
 
         raise ValueError(
             f"Unsupported context dialect detected: {context_type}")

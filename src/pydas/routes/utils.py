@@ -39,6 +39,9 @@ def verify_scopes(scopes):
     def check_access(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            if current_app.config["TESTING"]:
+                return fn(*args, **kwargs)
+
             try:
                 token = request.headers.get('Authorization').split()[1]
                 uid = validate_token(token)

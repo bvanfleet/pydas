@@ -19,6 +19,19 @@ class BaseContext(metaclass=ABCMeta):
     '''
     engine: Engine = None
 
+    @classmethod
+    @abstractmethod
+    def can_handle(cls, context_type: str) -> bool:
+        """
+        Returns a flag indicating whether this class can handle the given context type.
+
+        Parameters
+        ----------
+        context_type: str
+            Data store type of the context being requested.
+        """
+        raise NotImplementedError()
+
     @abstractmethod
     def get_session_maker(self):
         '''
