@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 from sqlalchemy.exc import OperationalError
 
-from pydas.config import Config
+from pydas.config import Config, metadata_container
 from pydas.handlers import handle_base_server_error
 from pydas.handlers import handle_database_error
 from pydas.routes import (acquire_bp,
@@ -27,6 +27,7 @@ Config.setup_logging('pydas.ini')
 app = Flask(__name__)
 app.logger.info("Starting sDAS API app")  # pylint: disable=no-member
 app.config.from_object(Config('pydas.ini'))
+app.container = metadata_container
 CORS(app)
 
 try:

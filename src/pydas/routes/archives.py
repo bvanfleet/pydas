@@ -1,5 +1,7 @@
 import logging
 
+from dependency_injector.wiring import inject
+
 from flask import Blueprint, make_response, request, abort
 from flask.json import jsonify
 from werkzeug.datastructures import FileStorage
@@ -7,11 +9,12 @@ from werkzeug.datastructures import FileStorage
 from sqlalchemy.orm.exc import NoResultFound
 
 from pydas_metadata import json
-from pydas_metadata.contexts import DatabaseContext
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Archive, Configuration
 
 from pydas import constants
 from pydas import scopes
+from pydas.config import metadata_container
 from pydas.routes.utils import get_session, verify_scopes
 from pydas.archive import download_archive, upload_archive
 
@@ -21,8 +24,10 @@ archives_bp = Blueprint('archives',
 
 
 @archives_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-def index():
-    session = get_session()
+@inject
+def index(metadata_context: BaseContext = metadata_container.context_factory('mysql', database='sdasadmin', username='bradley.vanfleet')):
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     if request.method == constants.HTTP_GET:
         logging.info("Fetching archive metadata from sDAS database")
@@ -33,8 +38,7 @@ def index():
         # Handling file upload in IPFS
         logging.info("Handling archive file upload request")
         file: FileStorage = request.files['dataset']
-        context = DatabaseContext('pydasadmin', 'root')
-        connection_string = context.get_configuration(
+        connection_string = metadata_context.get_configuration(
             'archiveIpfsConnectionString')
         if connection_string is None:
             logging.error(
@@ -45,7 +49,7 @@ def index():
         logging.info("Uploading archive")
         archive = upload_archive(file.stream.read(),
                                  connection_string.value,
-                                 context,
+                                 metadata_context,
                                  company_symbols=symbols)
     else:
         # Support registering existing dataset metadata within sDAS

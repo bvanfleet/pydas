@@ -2,6 +2,9 @@
 from configparser import ConfigParser
 import logging
 from logging.config import fileConfig
+from pydas_metadata import MetadataContainer
+
+metadata_container = MetadataContainer()
 
 # pylint: disable=invalid-name
 # Many of the Flask-style config names don't support the default naming convention
@@ -18,6 +21,8 @@ def load_config(filepath: str):
             stack_info=True)
 
     return parser
+
+# TODO: Make this Config object injectable using the dependency_injector library
 
 
 class Config:
