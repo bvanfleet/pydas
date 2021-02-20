@@ -39,9 +39,14 @@ class MockSession:
 class MockQuery:
     def __init__(self, **config):
         self.config = config
+        self.predicate = None
+
+    def filter(self, predicate):
+        self.predicate = predicate
+        return self
 
     def __getattribute__(self, name: str):
-        if name == 'config':
+        if name in ('config', 'predicate', 'filter'):
             return object.__getattribute__(self, name)
 
         if name not in self.config:

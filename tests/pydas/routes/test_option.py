@@ -44,3 +44,26 @@ class TestOptionRoute(unittest.TestCase):
 
         # assert
         self.assertEqual(res.status_code, 201)
+
+    def test_get_option(self):
+        # arrange
+        expected_option = Option(name="range",
+                                 feature_name="open",
+                                 company_symbol="gme",
+                                 option_type="str",
+                                 value_text="3m")
+        alternate_option = Option(name="range",
+                                  feature_name="open",
+                                  company_symbol="gme",
+                                  option_type="str",
+                                  value_text="3m")
+        MockContext.setup(
+            Option, all=[expected_option, alternate_option], filter=None)
+
+        # act
+        res = self.client.get(self.base_path + expected_option.name)
+
+        # assert
+        self.assertEqual(len(res.json), 2)
+        self.assertEqual(res.json,
+                         [expected_option.__json__(), alternate_option.__json__()])
