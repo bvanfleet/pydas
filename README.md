@@ -1,21 +1,15 @@
-# stock Data Acquisition Service (sDAS)
+# Python Data Acquisition Service
 
 A full python stack application for acquiring financial data and generating arbitrary data sets. Can be deployed as a REST API for dataset generation as a service, or run from the command line to create ad-hoc data sets for machine learning.
 
 ## Installation
 
-Currently, the simplest method for installing is from source. This guide assumes that Python 3.7 is installed with pip and virtualenv available. It is assumed and recommended that a virtual environment is created, and will be denoted in the scripts shown:
+Currently, the simplest method for installing is from source. This guide assumes that Python 3.7 or greater is installed with pip and virtualenv available. It is assumed and recommended that a virtual environment is created, and will be denoted in the scripts shown:
 
 ```shell
 $> git clone https://github.com/UVU-PFP-Research/Personal-Financial-Planner
 $> cd Personal-Financial-Planner/stock-data-acquisition
 (env) $> python setup.py install
-```
-
-Using wheel you'll first want to download the [latest release](https://github.com/UVU-PFP-Research/Personal-Financial-Planner/releases/latest) from GitHub. Once the sDAS wheel has been downloaded onto the target machine, you can then run the following to install:
-
-```shell
-(env) $> pip install sDAS-<version>-py3-none-any.whl
 ```
 
 Once the installation has been completed, you'll want to run the installer to setup the database. The installer can be found within the sDAS package and can be run by calling:
