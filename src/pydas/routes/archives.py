@@ -6,9 +6,9 @@ from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from metadata import json
-from metadata.contexts import DatabaseContext
-from metadata.models import Archive, Configuration
+from pydas_metadata import json
+from pydas_metadata.contexts import DatabaseContext
+from pydas_metadata.models import Archive, Configuration
 
 from pydas import constants
 from pydas import scopes

@@ -5,9 +5,11 @@ import smtplib
 import traceback
 from typing import List
 
-from metadata.models import Configuration
+from pydas_metadata.models import Configuration
 # TODO: We'll probably want to move this function into an pydas.utils module
 # for widespread usage availability.
+#
+# 20-02-2021 this may mean this is a potential candidate for dependency injection.
 from pydas.routes.utils import get_session
 
 

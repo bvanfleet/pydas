@@ -1,6 +1,6 @@
 import logging
 from flask import current_app, json, request
-from metadata.models import FeatureToggle
+from pydas_metadata.models import FeatureToggle
 from pydas.routes.utils import get_session
 from pydas.signals import SignalFactory
 from pydas.constants import FeatureToggles

@@ -1,5 +1,5 @@
 '''Mapping table module for metadata ORM usage'''
-from metadata.models.base import Base
+from pydas_metadata.models.base import Base
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 
 

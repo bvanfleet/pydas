@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask.json import jsonify
 
-from metadata import json
-from metadata.models import Handler
+from pydas_metadata import json
+from pydas_metadata.models import Handler
 
 from pydas import constants
 from pydas import scopes

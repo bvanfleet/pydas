@@ -1,5 +1,5 @@
 import unittest
-from metadata import json
+from pydas_metadata import json
 
 
 class MockImplementsJson:

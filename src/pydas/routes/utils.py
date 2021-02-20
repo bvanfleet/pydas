@@ -6,7 +6,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from firebase_admin import auth
 
-from metadata.contexts import ContextFactory
+from pydas_metadata.contexts import ContextFactory
 
 cred = credentials.Certificate('credentials.json')
 firebase_admin.initialize_app(cred)

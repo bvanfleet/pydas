@@ -3,8 +3,8 @@ from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.functions import func
 
-from metadata import json
-from metadata.models import Statistics
+from pydas_metadata import json
+from pydas_metadata.models import Statistics
 
 from pydas import constants
 from pydas import scopes

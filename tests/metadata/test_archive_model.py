@@ -1,8 +1,8 @@
 from datetime import datetime
 import unittest
 
-from metadata.contexts import MemoryContext
-from metadata.models import Archive, Base, Company
+from pydas_metadata.contexts import MemoryContext
+from pydas_metadata.models import Archive, Base, Company
 
 
 class TestArchive(unittest.TestCase):

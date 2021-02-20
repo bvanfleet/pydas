@@ -1,8 +1,7 @@
 import unittest
-from unittest import expectedFailure
 import types
 
-from metadata.models import EventHandler
+from pydas_metadata.models import EventHandler
 
 
 class TestEventHandler(unittest.TestCase):

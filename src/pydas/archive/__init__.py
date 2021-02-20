@@ -13,7 +13,7 @@ that was archived. If the dataset is invalid, then a TypeError will be raised.
 '''
 import logging
 
-from metadata.contexts import DatabaseContext
+from pydas_metadata.contexts import DatabaseContext
 
 from .ipfs import download_archive
 from .ipfs import upload_archive

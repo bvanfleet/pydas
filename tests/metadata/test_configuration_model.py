@@ -1,13 +1,9 @@
 # pylint: disable=C0114,C0115,C0116
 # TODO: Determine how we can move the above rules into a pylintrc file for the testing directory
-
-# This is an example of the unit testing that we'll want to accomplish for the entire metadata package, and pydas project.
-# Not everything is tested (such as the individual properties), we assume that SQLAlchemy has appropriate testing for
-# their code. If they do not, then we can blame them :)
 import unittest
 import json
 
-from metadata.models import Configuration
+from pydas_metadata.models import Configuration
 
 
 class TestConfigurationModel(unittest.TestCase):

@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from metadata import models
+from pydas_metadata import models
 
 session_factory = sessionmaker()
 

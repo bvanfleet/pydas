@@ -1,4 +1,4 @@
-from metadata.contexts import BaseContext
+from pydas_metadata.contexts import BaseContext
 
 
 class MockContext(BaseContext):

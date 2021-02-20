@@ -2,8 +2,8 @@ from flask import Blueprint, request, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 
-from metadata import json
-from metadata.models import Feature, Handler
+from pydas_metadata import json
+from pydas_metadata.models import Feature, Handler
 
 from pydas import constants
 from pydas import scopes

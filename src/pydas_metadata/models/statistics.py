@@ -3,9 +3,9 @@ from datetime import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from metadata.models.base import Base
-from metadata.models.company import Company
-from metadata.models.feature import Feature
+from pydas_metadata.models.base import Base
+from pydas_metadata.models.company import Company
+from pydas_metadata.models.feature import Feature
 
 
 class Statistics(Base):

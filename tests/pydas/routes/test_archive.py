@@ -1,8 +1,8 @@
 from datetime import datetime
 import unittest
 
-from metadata.contexts import ContextFactory
-from metadata.models import Archive
+from pydas_metadata.contexts import ContextFactory
+from pydas_metadata.models import Archive
 from tests.pydas.mocks import MockContext
 from tests.pydas.fixtures import app_client
 

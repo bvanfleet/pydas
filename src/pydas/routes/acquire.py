@@ -6,8 +6,8 @@ from flask import (Blueprint, make_response, jsonify,
                    request, send_file, current_app)
 from sqlalchemy.orm.exc import NoResultFound
 
-from metadata import json
-from metadata.models import Company, Configuration, FeatureToggle, Option
+from pydas_metadata import json
+from pydas_metadata.models import Company, Configuration, FeatureToggle, Option
 
 from pydas import constants, scopes
 from pydas.routes.utils import get_session, verify_scopes

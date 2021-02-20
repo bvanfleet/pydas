@@ -4,7 +4,7 @@ from typing import List
 from blinker import Signal
 from flask.signals import Namespace
 
-from metadata.models import EventHandler
+from pydas_metadata.models import EventHandler
 from pydas.routes.utils import get_session
 
 from .type import SignalType

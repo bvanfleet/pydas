@@ -1,6 +1,6 @@
 import unittest
-from metadata.contexts import DatabaseContext, MemoryContext
-from metadata.models import Base, Configuration
+from pydas_metadata.contexts import DatabaseContext, MemoryContext
+from pydas_metadata.models import Base, Configuration
 
 
 class TestOrmContext(unittest.TestCase):

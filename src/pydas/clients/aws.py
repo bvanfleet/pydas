@@ -6,8 +6,8 @@ import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
 
-from metadata.contexts.base import BaseContext
-from metadata.models import Company, Configuration, Feature
+from pydas_metadata.contexts.base import BaseContext
+from pydas_metadata.models import Company, Configuration, Feature
 
 from pydas.clients.base import BaseDataClient
 

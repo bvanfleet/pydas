@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
-from metadata.models.base import Base
-from metadata.models.company_feature import CompanyFeatureMap
+from pydas_metadata.models.base import Base
+from pydas_metadata.models.company_feature import CompanyFeatureMap
 
 
 class Company(Base):

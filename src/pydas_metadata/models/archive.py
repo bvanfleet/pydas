@@ -3,8 +3,8 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from metadata import models
-from metadata.models.base import Base
+from pydas_metadata import models
+from pydas_metadata.models.base import Base
 
 
 class Archive(Base):

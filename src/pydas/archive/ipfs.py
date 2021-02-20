@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
-from metadata.contexts.base import BaseContext
-from metadata.models import Archive
+from pydas_metadata.contexts.base import BaseContext
+from pydas_metadata.models import Archive
 from pydas.clients import IpfsArchiveClient
 
 

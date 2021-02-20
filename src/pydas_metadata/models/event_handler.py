@@ -4,7 +4,7 @@ from typing import Callable
 
 from sqlalchemy import Boolean, Column, Integer, String
 
-from metadata.models.base import Base
+from pydas_metadata.models.base import Base
 
 
 class EventHandler(Base):

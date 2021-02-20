@@ -1,5 +1,5 @@
 import unittest
-from metadata.models import Feature, Handler
+from pydas_metadata.models import Feature, Handler
 
 
 class TestFeatureModel(unittest.TestCase):

@@ -1,6 +1,6 @@
 from sqlalchemy.engine import create_engine
 
-from metadata.contexts.base import BaseContext, session_factory
+from pydas_metadata.contexts.base import BaseContext, session_factory
 
 
 class MemoryContext(BaseContext):

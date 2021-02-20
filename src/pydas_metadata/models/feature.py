@@ -3,9 +3,9 @@ import importlib
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from metadata.models.base import Base
-from metadata.models.handler import Handler
-from metadata import constants as const
+from pydas_metadata.models.base import Base
+from pydas_metadata.models.handler import Handler
+from pydas_metadata import constants as const
 
 
 class Feature(Base):

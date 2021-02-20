@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from metadata.models.base import Base
+from pydas_metadata.models.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

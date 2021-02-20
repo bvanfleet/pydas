@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Boolean, Integer, String
 
-from metadata.models.base import Base
+from pydas_metadata.models.base import Base
 
 
 class FeatureToggle(Base):

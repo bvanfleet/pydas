@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from metadata.models import Company, Feature
+from pydas_metadata.models import Company, Feature
 
 
 class BaseDataClient(metaclass=ABCMeta):

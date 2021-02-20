@@ -1,6 +1,6 @@
 import unittest
 
-from metadata.models import Option
+from pydas_metadata.models import Option
 
 
 class TestOption(unittest.TestCase):
