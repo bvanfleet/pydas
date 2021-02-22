@@ -14,7 +14,7 @@ from pydas_metadata.models import Archive, Configuration
 
 from pydas import constants
 from pydas import scopes
-from pydas.config import metadata_container
+from pydas.containers import metadata_container
 from pydas.routes.utils import get_session, verify_scopes
 from pydas.archive import download_archive, upload_archive
 
