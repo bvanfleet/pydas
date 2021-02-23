@@ -5,12 +5,12 @@ import smtplib
 import traceback
 from typing import List
 
+from flask import current_app
+
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Configuration
-# TODO: We'll probably want to move this function into an pydas.utils module
-# for widespread usage availability.
-#
-# 20-02-2021 this may mean this is a potential candidate for dependency injection.
-from pydas.routes.utils import get_session
+
+from pydas.containers import metadata_container
 
 
 class Notification(Enum):
@@ -72,7 +72,12 @@ def email_information(uri: str, message: str):
 
 def email_error(uri: str, exception: Exception):
     smtp_config = get_smtp_config()
-    exception_trace = ('').join(traceback.format_tb(exception.__traceback__))
+
+    if exception is not None:
+        exception_trace = ('').join(
+            traceback.format_tb(exception.__traceback__))
+    else:
+        exception_trace = 'Invalid exception object provided'
 
     email = EmailMessage()
     email.set_content(
@@ -88,7 +93,7 @@ def email_error(uri: str, exception: Exception):
     email['From'] = smtp_config['fromAddress']
     email['To'] = smtp_config['toAddress']
 
-    logging.debug("Sending email message to %s", smtp_config['To'])
+    logging.debug("Sending email message to %s", email['To'])
     with smtplib.SMTP_SSL(smtp_config['hostname'], port=smtp_config['port']) as smtp:
         smtp.login(smtp_config['username'], smtp_config['password'])
         smtp.send_message(email)
@@ -112,7 +117,12 @@ def get_smtp_config() -> dict:
         Thrown if the configuration object cannot be mapped to a known SMTP configuration.
     """
     logging.debug("Fetching all SMTP configuration from sDAS database")
-    session = get_session()
+
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
+
     smtp_configs: List[Configuration] = session.query(Configuration).filter(
         Configuration.name.ilike('smtp%')).all()
 

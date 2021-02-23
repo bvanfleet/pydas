@@ -1,8 +1,7 @@
 import logging
 
-from dependency_injector.wiring import inject
-
 from flask import Blueprint, make_response, request, abort
+from flask.globals import current_app
 from flask.json import jsonify
 from werkzeug.datastructures import FileStorage
 
@@ -15,7 +14,7 @@ from pydas_metadata.models import Archive, Configuration
 from pydas import constants
 from pydas import scopes
 from pydas.containers import metadata_container
-from pydas.routes.utils import get_session, verify_scopes
+from pydas.routes.utils import verify_scopes
 from pydas.archive import download_archive, upload_archive
 
 archives_bp = Blueprint('archives',
@@ -24,8 +23,9 @@ archives_bp = Blueprint('archives',
 
 
 @archives_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-@inject
-def index(metadata_context: BaseContext = metadata_container.context_factory('mysql', database='sdasadmin', username='bradley.vanfleet')):
+def index():
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
     session_maker = metadata_context.get_session_maker()
     session = session_maker()
 
@@ -71,7 +71,10 @@ def index(metadata_context: BaseContext = metadata_container.context_factory('my
 
 @archives_bp.route('/<archive_address>', methods=[constants.HTTP_GET])
 def archive_index(archive_address):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     try:
         archive = session.query(Archive).filter(
             Archive.address == archive_address).one()
@@ -86,7 +89,10 @@ def archive_index(archive_address):
 
 @archives_bp.route('/<archive_address>/download', methods=[constants.HTTP_GET])
 def archive_data(archive_address):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     connection_string = session.query(Configuration).filter(
         Configuration.name == 'archiveIpfsConnectionString').one_or_none()
     if connection_string is None:

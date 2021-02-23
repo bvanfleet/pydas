@@ -7,13 +7,15 @@ from flask import (Blueprint, make_response, jsonify,
 from sqlalchemy.orm.exc import NoResultFound
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Company, Configuration, FeatureToggle, Option
 
 from pydas import constants, scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas.routes.utils import verify_scopes
 from pydas.signals import SignalFactory
 from pydas.clients.iex import IexClient
 from pydas.constants import FeatureToggles
+from pydas.containers import metadata_container
 from pydas.formatters import BaseFormatter, FormatterFactory
 
 # Disable the call to current_app._get_current_object as it's recommended by Flask
@@ -51,7 +53,11 @@ def acquire(company_symbol):
     sqlalchemy.exc.OperationalError:
         Thrown if there is an issue communicating with the metadata database.
     """
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
+
     query = session.query(Company).filter(Company.symbol == company_symbol)
     event_handler = session.query(FeatureToggle).filter(
         FeatureToggle.name == FeatureToggles.event_handlers).one_or_none()

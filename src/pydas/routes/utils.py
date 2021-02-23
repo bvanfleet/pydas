@@ -6,17 +6,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from firebase_admin import auth
 
-from pydas_metadata.contexts import ContextFactory
-
 cred = credentials.Certificate('credentials.json')
 firebase_admin.initialize_app(cred)
-
-
-def get_session():
-    context = ContextFactory.get_context(current_app.config['DB_DIALECT'],
-                                         **current_app.config['DB_CONFIG'])
-    session_maker = context.get_session_maker()
-    return session_maker()
 
 
 def validate_token(token):

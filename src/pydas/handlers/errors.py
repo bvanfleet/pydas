@@ -1,14 +1,23 @@
 import logging
+
 from flask import current_app, json, request
+
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import FeatureToggle
-from pydas.routes.utils import get_session
+
 from pydas.signals import SignalFactory
 from pydas.constants import FeatureToggles
+from pydas.containers import metadata_container
 
 
 def handle_base_server_error(error):
     logging.info("Handling base server error")
-    session = get_session()
+
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
+
     feature_toggle = session.query(FeatureToggle).filter(
         FeatureToggle.name == FeatureToggles.event_handlers).one_or_none()
     if feature_toggle.is_enabled is True:

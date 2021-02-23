@@ -8,6 +8,7 @@ from flask_cors import CORS
 from sqlalchemy.exc import OperationalError
 
 from pydas.config import Config
+from pydas.containers import config_container
 from pydas.handlers import handle_base_server_error
 from pydas.handlers import handle_database_error
 from pydas.routes import (acquire_bp,
@@ -22,21 +23,24 @@ from pydas.routes import (acquire_bp,
 from pydas.routes.swagger import SWAGGER_URL
 from pydas.signals import SignalFactory
 
+# pylint: disable=no-member,unused-variable
+# Ignoring warnings for the app-registered functions and app logging.
+
 
 def create_app(config_filename: str = 'pydas.yaml'):
     """The pyDAS application factory for configuring the server object at runtime."""
-    Config.setup_logging(config_filename)
+    config_container.config.from_yaml(config_filename)
+    config_container.init_resources()
 
     app = Flask(__name__)
-    app.logger.info("Starting sDAS API app")  # pylint: disable=no-member
-    app.config.from_object(Config(config_filename))
+    app.logger.info("Starting sDAS API app")
+    app.config.from_object(Config())
     CORS(app)
 
     try:
         with app.app_context():
             SignalFactory.register_signals()
     except RuntimeError as exc:
-        # pylint: disable=no-member
         app.logger.warning(
             'Unable to register signals, please check that blinker is installed: %s',
             exc)
@@ -57,11 +61,16 @@ def create_app(config_filename: str = 'pydas.yaml'):
     app.register_error_handler(500, handle_base_server_error)
 
     @app.route(f'{SWAGGER_URL}/dist/swagger')
-    def dist():  # pylint: disable=unused-variable
+    def dist():
         '''Returns a redirect for the Swagger UI config.yaml distribution.'''
         return redirect(url_for('static', filename="swagger-config.yaml"))
+
+    @app.after_request
+    def update_header(response):
+        response.headers['server'] = f'pyDAS/{__version__}'
+        return response
 
     return app
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"

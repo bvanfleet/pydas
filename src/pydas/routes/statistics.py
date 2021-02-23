@@ -1,14 +1,15 @@
-from flask import Blueprint, make_response
+from flask import Blueprint, current_app, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.functions import func
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Statistics
 
-from pydas import constants
-from pydas import scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas import constants, scopes
+from pydas.containers import metadata_container
+from pydas.routes.utils import verify_scopes
 
 statistics_bp = Blueprint('statistics',
                           'pydas.routes.statistics',
@@ -18,7 +19,10 @@ statistics_bp = Blueprint('statistics',
 @statistics_bp.route(constants.BASE_PATH)
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
 def index():
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     query = session.query(Statistics)
     statistics = query.all()
@@ -29,7 +33,10 @@ def index():
 @statistics_bp.route('/company/<company_symbol>')
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
 def company_index(company_symbol):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     query = session.query(
         Statistics.company_symbol,
@@ -55,7 +62,10 @@ def company_index(company_symbol):
 @statistics_bp.route('/company/<company_symbol>/features')
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
 def feature_index(company_symbol):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     query = session.query(
         Statistics.company_symbol,
@@ -78,7 +88,10 @@ def feature_index(company_symbol):
 @statistics_bp.route('/company/<company_symbol>/features/<feature_name>')
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
 def feature_stats(company_symbol, feature_name):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     query = session.query(
         Statistics.company_symbol,

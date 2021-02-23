@@ -1,8 +1,4 @@
 """Server configuration functions and class definitions"""
-from logging.config import dictConfig
-
-from dependency_injector.errors import Error
-
 from pydas.containers import config_container
 
 # pylint: disable=invalid-name
@@ -12,8 +8,7 @@ from pydas.containers import config_container
 class Config:
     """Represents configuration for the server, including database details"""
 
-    def __init__(self, config_path: str):
-        config_container.config.from_yaml(config_path)
+    def __init__(self):
         self.TESTING = config_container.config.testing() or False
 
         with config_container.config.database as db_config:
@@ -43,17 +38,3 @@ class Config:
             'username': self.DB_USER,
             'database': self.DB_NAME
         }
-
-    @classmethod
-    def setup_logging(cls, filepath: str):
-        '''
-        Configures the logging with a given log file. If none
-        are provided, then the default 'logs.conf' is used.
-        If no logging configuration files are provided or
-        found, then the default logging is used.
-        '''
-        config_container.config.from_yaml(filepath, required=True)
-        try:
-            dictConfig(config_container.config.logging())
-        except Error:
-            pass

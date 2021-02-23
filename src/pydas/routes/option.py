@@ -1,12 +1,13 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, current_app, request, make_response
 from flask.json import jsonify
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Option
 
-from pydas import constants
-from pydas import scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas import constants, scopes
+from pydas.containers import metadata_container
+from pydas.routes.utils import verify_scopes
 
 option_bp = Blueprint('options',
                       'pydas.routes.option',
@@ -14,9 +15,13 @@ option_bp = Blueprint('options',
 
 
 @option_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-@verify_scopes({constants.HTTP_GET: scopes.OPTIONS_READ, constants.HTTP_POST: scopes.OPTIONS_WRITE})
+@verify_scopes({constants.HTTP_GET: scopes.OPTIONS_READ,
+                constants.HTTP_POST: scopes.OPTIONS_WRITE})
 def index():
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     if request.method == constants.HTTP_GET:
         query = session.query(Option)
@@ -41,7 +46,10 @@ def index():
 @option_bp.route('/<option_name>', methods=[constants.HTTP_GET])
 @verify_scopes({constants.HTTP_GET: scopes.OPTIONS_READ})
 def option_index(option_name):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     query = session.query(Option).filter(Option.name == option_name)
     options = query.all()

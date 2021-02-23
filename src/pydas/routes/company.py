@@ -1,13 +1,14 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, current_app, request, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Company, Feature, Option
 
-from pydas import constants
-from pydas import scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas import constants, scopes
+from pydas.containers import metadata_container
+from pydas.routes.utils import verify_scopes
 
 company_bp = Blueprint('companies',
                        'pydas.routes.companies',
@@ -17,7 +18,10 @@ company_bp = Blueprint('companies',
 @company_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_POST: scopes.COMPANIES_WRITE})
 def companies_index():
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     query = session.query(Company)
 
     if request.method == constants.HTTP_GET:
@@ -37,7 +41,10 @@ def companies_index():
 @company_bp.route('/<company_symbol>', methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_PATCH: scopes.COMPANIES_WRITE, constants.HTTP_DELETE: scopes.COMPANIES_DELETE})
 def get_company(company_symbol):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     query = session.query(Company).filter(Company.symbol == company_symbol)
     try:
         company = query.one()
@@ -69,7 +76,10 @@ def get_company(company_symbol):
 @company_bp.route('/<company_symbol>/features', methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_POST: scopes.COMPANIES_WRITE})
 def company_features_index(company_symbol):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     query = session.query(Company).filter(Company.symbol == company_symbol)
     try:
         company = query.one()
@@ -98,7 +108,10 @@ def company_features_index(company_symbol):
 @company_bp.route('/<company_symbol>/features/<feature_name>', methods=[constants.HTTP_GET, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_DELETE: scopes.COMPANIES_DELETE})
 def company_feature_index(company_symbol, feature_name):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     c_query = session.query(Company).filter(Company.symbol == company_symbol)
     try:
         company = c_query.one()
@@ -129,7 +142,10 @@ def company_feature_index(company_symbol, feature_name):
 @company_bp.route('/<company_symbol>/features/<feature_name>/options', methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_POST: scopes.COMPANIES_WRITE})
 def options_index(company_symbol, feature_name):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
 
     if request.method == constants.HTTP_GET:
         query = session.query(Option).filter(
@@ -157,7 +173,10 @@ def options_index(company_symbol, feature_name):
 @company_bp.route('/<company_symbol>/features/<feature_name>/options/<option_name>', methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_PATCH: scopes.COMPANIES_WRITE, constants.HTTP_DELETE: scopes.COMPANIES_DELETE})
 def option_index(company_symbol, feature_name, option_name):
-    session = get_session()
+    metadata_context: BaseContext = metadata_container.context_factory(
+        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+    session_maker = metadata_context.get_session_maker()
+    session = session_maker()
     query = session.query(Option).filter(
         Option.company_symbol == company_symbol,
         Option.feature_name == feature_name,

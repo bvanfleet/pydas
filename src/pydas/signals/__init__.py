@@ -2,12 +2,14 @@ import logging
 from typing import List
 
 from blinker import Signal
+from flask import current_app
 from flask.signals import Namespace
 
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import EventHandler
-from pydas.routes.utils import get_session
 
-from .type import SignalType
+from pydas.containers import metadata_container
+from pydas.signals.type import SignalType
 
 pydas_events = Namespace()
 
@@ -47,7 +49,12 @@ class SignalFactory:
     def register_signals(cls):
         """Registers a new event handler with the signalling factory."""
         logging.debug('Registering signals...')
-        session = get_session()
+
+        metadata_context: BaseContext = metadata_container.context_factory(
+            current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
+        session_maker = metadata_context.get_session_maker()
+        session = session_maker()
+
         signals: List[EventHandler] = session.query(EventHandler).all()
         for signal in signals:
             if not signal.is_enabled:
