@@ -1,4 +1,5 @@
-from flask import Blueprint, current_app, make_response, request
+from dependency_injector.wiring import inject, Provide
+from flask import Blueprint, make_response, request
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -7,7 +8,7 @@ from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Configuration
 
 from pydas import constants, scopes
-from pydas.containers import metadata_container
+from pydas.containers import ApplicationContainer
 from pydas.routes.utils import verify_scopes
 
 configuration_bp = Blueprint('configuration',
@@ -17,11 +18,10 @@ configuration_bp = Blueprint('configuration',
 
 @configuration_bp.route(constants.BASE_PATH)
 @verify_scopes({constants.HTTP_GET: scopes.CONFIGURATION_READ})
-def get_configuration():
-    metadata_context: BaseContext = metadata_container.context_factory(
-        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
-    session_maker = metadata_context.get_session_maker()
-    session = session_maker()
+@inject
+def get_configuration(
+        metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     query = session.query(Configuration)
     configurations = query.all()
 
@@ -30,11 +30,10 @@ def get_configuration():
 
 @configuration_bp.route('/<configuration_name>', methods=[constants.HTTP_GET, constants.HTTP_PATCH])
 @verify_scopes({constants.HTTP_GET: scopes.CONFIGURATION_READ, constants.HTTP_PATCH: scopes.CONFIGURATION_WRITE})
-def configuration_index(configuration_name):
-    metadata_context: BaseContext = metadata_container.context_factory(
-        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
-    session_maker = metadata_context.get_session_maker()
-    session = session_maker()
+@inject
+def configuration_index(configuration_name: str,
+                        metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     query = session.query(Configuration).filter(
         Configuration.name == configuration_name)
 

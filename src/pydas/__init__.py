@@ -7,21 +7,19 @@ from flask_cors import CORS
 
 from sqlalchemy.exc import OperationalError
 
-from pydas.config import Config
-from pydas.containers import config_container
+from pydas import routes, signals
+from pydas.containers import ApplicationContainer
 from pydas.handlers import handle_base_server_error
 from pydas.handlers import handle_database_error
-from pydas.routes import (acquire_bp,
-                          archives_bp,
-                          company_bp,
-                          configuration_bp,
-                          feature_bp,
-                          handler_bp,
-                          option_bp,
-                          statistics_bp,
-                          swaggerui_bp)
+from pydas.routes import (acquire,
+                          archives,
+                          company,
+                          configuration,
+                          feature,
+                          handler,
+                          option,
+                          statistics)
 from pydas.routes.swagger import SWAGGER_URL
-from pydas.signals import SignalFactory
 
 # pylint: disable=no-member,unused-variable
 # Ignoring warnings for the app-registered functions and app logging.
@@ -29,32 +27,27 @@ from pydas.signals import SignalFactory
 
 def create_app(config_filename: str = 'pydas.yaml'):
     """The pyDAS application factory for configuring the server object at runtime."""
-    config_container.config.from_yaml(config_filename)
-    config_container.init_resources()
-
     app = Flask(__name__)
-    app.logger.info("Starting sDAS API app")
-    app.config.from_object(Config())
+
+    app_container = ApplicationContainer(app=app)
+    app_container.config.from_yaml(config_filename)
+    app.config["TESTING"] = app_container.config.testing()
+    app_container.init_resources()
+    app.container = app_container
+
+    app.logger.info("Starting pyDAS API app")
     CORS(app)
 
-    try:
-        with app.app_context():
-            SignalFactory.register_signals()
-    except RuntimeError as exc:
-        app.logger.warning(
-            'Unable to register signals, please check that blinker is installed: %s',
-            exc)
-
     # Route registrations
-    app.register_blueprint(feature_bp)
-    app.register_blueprint(company_bp)
-    app.register_blueprint(handler_bp)
-    app.register_blueprint(statistics_bp)
-    app.register_blueprint(configuration_bp)
-    app.register_blueprint(option_bp)
-    app.register_blueprint(acquire_bp)
-    app.register_blueprint(archives_bp)
-    app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
+    app.register_blueprint(routes.feature_bp)
+    app.register_blueprint(routes.company_bp)
+    app.register_blueprint(routes.handler_bp)
+    app.register_blueprint(routes.statistics_bp)
+    app.register_blueprint(routes.configuration_bp)
+    app.register_blueprint(routes.option_bp)
+    app.register_blueprint(routes.acquire_bp)
+    app.register_blueprint(routes.archives_bp)
+    app.register_blueprint(routes.swaggerui_bp, url_prefix=SWAGGER_URL)
 
     # Additional error handler registrations
     app.register_error_handler(OperationalError, handle_database_error)
@@ -69,6 +62,29 @@ def create_app(config_filename: str = 'pydas.yaml'):
     def update_header(response):
         response.headers['server'] = f'pyDAS/{__version__}'
         return response
+
+    try:
+        app.container.wire(
+            modules=[acquire,
+                     archives,
+                     signals,
+                     company,
+                     configuration,
+                     feature,
+                     handler,
+                     option,
+                     statistics])
+    except Exception as exc:
+        app.logger.error("Unable to wire dependency injection!", exc_info=exc)
+        exit(1)
+
+    try:
+        with app.app_context():
+            signals.SignalFactory.register_signals()
+    except RuntimeError as exc:
+        app.logger.warning(
+            'Unable to register signals, please check that blinker is installed: %s',
+            exc)
 
     return app
 

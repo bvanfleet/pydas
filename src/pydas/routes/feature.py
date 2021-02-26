@@ -1,4 +1,5 @@
-from flask import Blueprint, current_app, request, make_response
+from dependency_injector.wiring import inject, Provide
+from flask import Blueprint, request, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -7,7 +8,7 @@ from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Feature, Handler
 
 from pydas import constants, scopes
-from pydas.containers import metadata_container
+from pydas.containers import ApplicationContainer
 from pydas.routes.utils import verify_scopes
 
 feature_bp = Blueprint('features',
@@ -19,14 +20,11 @@ feature_bp = Blueprint('features',
                   methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ,
                 constants.HTTP_POST: scopes.FEATURES_WRITE})
-def index():
+@inject
+def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """Handler for base level URI for the features endpoint.
     Supports GET and POST methods for interacting."""
-    metadata_context: BaseContext = metadata_container.context_factory(
-        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
-    session_maker = metadata_context.get_session_maker()
-    session = session_maker()
-
+    session = metadata_context.get_session()
     if request.method == constants.HTTP_GET:
         query = session.query(Feature)
         features = query.all()
@@ -52,13 +50,12 @@ def index():
 @verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ,
                 constants.HTTP_PATCH: scopes.FEATURES_WRITE,
                 constants.HTTP_DELETE: scopes.FEATURES_DELETE})
-def feature_index(feature_name):
+@inject
+def feature_index(feature_name: str,
+                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """Handler for individual feature level URI of the features endpoint.
     Supports GET, PATCH, and DELETE methods for interacting."""
-    metadata_context: BaseContext = metadata_container.context_factory(
-        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
-    session_maker = metadata_context.get_session_maker()
-    session = session_maker()
+    session = metadata_context.get_session()
     query = session.query(Feature).filter(Feature.name == feature_name)
 
     try:

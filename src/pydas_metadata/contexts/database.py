@@ -15,12 +15,12 @@ class DatabaseContext(BaseContext):
         db_pass = f':{password}' if password is not None else ''
         self.engine = create_engine(
             f'mysql://{username}{db_pass}@{hostname}:{port}/{database}')
+        session_factory.configure(bind=self.engine)
 
     @classmethod
     def can_handle(cls, context_type) -> bool:
         return context_type == 'mysql'
 
-    def get_session_maker(self):
+    def get_session(self):
         """Returns a Session factory object for connecting to the database"""
-        session_factory.configure(bind=self.engine)
-        return session_factory
+        return session_factory()

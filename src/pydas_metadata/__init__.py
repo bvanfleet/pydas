@@ -6,8 +6,7 @@
   the metadata database used to control data acquisition.
 """
 
-from .container import MetadataContainer
 from .json import json
 
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

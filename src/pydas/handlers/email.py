@@ -5,12 +5,12 @@ import smtplib
 import traceback
 from typing import List
 
-from flask import current_app
+from dependency_injector.wiring import inject, Provide
 
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Configuration
 
-from pydas.containers import metadata_container
+from pydas.containers import ApplicationContainer
 
 
 class Notification(Enum):
@@ -101,8 +101,12 @@ def email_error(uri: str, exception: Exception):
 
     logging.debug("Email message sent!")
 
+# TODO: Need to hook up some dynamic dependency injection in order for this to work.
 
-def get_smtp_config() -> dict:
+
+@inject
+def get_smtp_config(
+        metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]) -> dict:
     """
     Retrieves the SMTP configuration from the metadata store.
 
@@ -117,12 +121,7 @@ def get_smtp_config() -> dict:
         Thrown if the configuration object cannot be mapped to a known SMTP configuration.
     """
     logging.debug("Fetching all SMTP configuration from sDAS database")
-
-    metadata_context: BaseContext = metadata_container.context_factory(
-        current_app.config['DB_DIALECT'], **current_app.config['DB_CONFIG'])
-    session_maker = metadata_context.get_session_maker()
-    session = session_maker()
-
+    session = metadata_context.get_session()
     smtp_configs: List[Configuration] = session.query(Configuration).filter(
         Configuration.name.ilike('smtp%')).all()
 
