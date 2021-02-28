@@ -22,6 +22,7 @@ archives_bp = Blueprint('archives',
 
 
 @archives_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
+@verify_scopes({constants.HTTP_GET: scopes.ARCHIVES_READ, constants.HTTP_POST: scopes.ARCHIVES_WRITE})
 @inject
 def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     session = metadata_context.get_session()

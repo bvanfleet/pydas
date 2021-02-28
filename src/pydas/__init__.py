@@ -11,14 +11,6 @@ from pydas import routes, signals
 from pydas.containers import ApplicationContainer
 from pydas.handlers import handle_base_server_error
 from pydas.handlers import handle_database_error
-from pydas.routes import (acquire,
-                          archives,
-                          company,
-                          configuration,
-                          feature,
-                          handler,
-                          option,
-                          statistics)
 from pydas.routes.swagger import SWAGGER_URL
 
 # pylint: disable=no-member,unused-variable
@@ -27,26 +19,36 @@ from pydas.routes.swagger import SWAGGER_URL
 
 def create_app(config_filename: str = 'pydas.yaml'):
     """The pyDAS application factory for configuring the server object at runtime."""
-    app = Flask(__name__)
 
-    app_container = ApplicationContainer(app=app)
+    app_container = ApplicationContainer()
     app_container.config.from_yaml(config_filename)
-    app.config["TESTING"] = app_container.config.testing()
     app_container.init_resources()
-    app.container = app_container
+    app_container.wire(
+        modules=[routes.acquire,
+                 routes.archives,
+                 routes.company,
+                 routes.configuration,
+                 routes.feature,
+                 routes.handler,
+                 routes.option,
+                 routes.statistics,
+                 signals])
 
+    app = Flask(__name__)
+    app.config["TESTING"] = app_container.config.testing()
+    app.container = app_container
     app.logger.info("Starting pyDAS API app")
     CORS(app)
 
     # Route registrations
-    app.register_blueprint(routes.feature_bp)
-    app.register_blueprint(routes.company_bp)
-    app.register_blueprint(routes.handler_bp)
-    app.register_blueprint(routes.statistics_bp)
-    app.register_blueprint(routes.configuration_bp)
-    app.register_blueprint(routes.option_bp)
     app.register_blueprint(routes.acquire_bp)
     app.register_blueprint(routes.archives_bp)
+    app.register_blueprint(routes.company_bp)
+    app.register_blueprint(routes.configuration_bp)
+    app.register_blueprint(routes.feature_bp)
+    app.register_blueprint(routes.handler_bp)
+    app.register_blueprint(routes.option_bp)
+    app.register_blueprint(routes.statistics_bp)
     app.register_blueprint(routes.swaggerui_bp, url_prefix=SWAGGER_URL)
 
     # Additional error handler registrations
@@ -62,21 +64,6 @@ def create_app(config_filename: str = 'pydas.yaml'):
     def update_header(response):
         response.headers['server'] = f'pyDAS/{__version__}'
         return response
-
-    try:
-        app.container.wire(
-            modules=[acquire,
-                     archives,
-                     signals,
-                     company,
-                     configuration,
-                     feature,
-                     handler,
-                     option,
-                     statistics])
-    except Exception as exc:
-        app.logger.error("Unable to wire dependency injection!", exc_info=exc)
-        exit(1)
 
     try:
         with app.app_context():

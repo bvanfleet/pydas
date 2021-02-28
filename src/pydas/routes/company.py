@@ -1,5 +1,5 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, current_app, request, make_response
+from flask import Blueprint, request, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 
