@@ -1,14 +1,16 @@
+from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.functions import func
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Statistics
 
-from pydas import constants
-from pydas import scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas import constants, scopes
+from pydas.containers import ApplicationContainer
+from pydas.routes.utils import verify_scopes
 
 statistics_bp = Blueprint('statistics',
                           'pydas.routes.statistics',
@@ -17,9 +19,9 @@ statistics_bp = Blueprint('statistics',
 
 @statistics_bp.route(constants.BASE_PATH)
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
-def index():
-    session = get_session()
-
+@inject
+def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     query = session.query(Statistics)
     statistics = query.all()
 
@@ -28,9 +30,9 @@ def index():
 
 @statistics_bp.route('/company/<company_symbol>')
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
-def company_index(company_symbol):
-    session = get_session()
-
+def company_index(company_symbol: str,
+                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     query = session.query(
         Statistics.company_symbol,
         func.sum(Statistics.row_count).label("row_count")
@@ -54,9 +56,10 @@ def company_index(company_symbol):
 
 @statistics_bp.route('/company/<company_symbol>/features')
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
-def feature_index(company_symbol):
-    session = get_session()
-
+@inject
+def feature_index(company_symbol: str,
+                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     query = session.query(
         Statistics.company_symbol,
         Statistics.feature_name,
@@ -77,9 +80,11 @@ def feature_index(company_symbol):
 
 @statistics_bp.route('/company/<company_symbol>/features/<feature_name>')
 @verify_scopes({constants.HTTP_GET: scopes.STATISTICS_READ})
-def feature_stats(company_symbol, feature_name):
-    session = get_session()
-
+@inject
+def feature_stats(company_symbol: str,
+                  feature_name: str,
+                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     query = session.query(
         Statistics.company_symbol,
         Statistics.feature_name,

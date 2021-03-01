@@ -47,7 +47,7 @@ class TestArchive(unittest.TestCase):
         expected_company_count = 1
 
         # act
-        companies = self.archive.companies(self.context.get_session_maker()())
+        companies = self.archive.companies(self.context.get_session())
 
         # assert
         self.assertEqual(expected_company_count, len(companies))
@@ -77,7 +77,7 @@ class TestArchive(unittest.TestCase):
         self.aapl = Company(name='Apple', symbol='aapl')
         self.msft = Company(name='Microsoft', symbol='msft')
 
-        session = self.context.get_session_maker()()
+        session = self.context.get_session()
         session.add(self.aapl)
         session.add(self.msft)
         session.commit()

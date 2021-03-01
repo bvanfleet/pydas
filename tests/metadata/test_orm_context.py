@@ -9,10 +9,9 @@ class TestOrmContext(unittest.TestCase):
     def test_can_connect(self):
         # arrange
         context = DatabaseContext('pydasadmin', 'root')
-        session_factory = context.get_session_maker()
 
         # act
-        session = session_factory()
+        session = context.get_session()
 
         # assert
         self.assertIsNotNone(
@@ -28,7 +27,7 @@ class TestOrmContext(unittest.TestCase):
 
         context = MemoryContext()
         Base.metadata.create_all(context.engine)
-        session = context.get_session_maker()()
+        session = context.get_session()
         session.add(Configuration(name='test1', type='str', value_text='foo'))
         session.commit()
 

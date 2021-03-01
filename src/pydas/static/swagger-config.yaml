@@ -1,15 +1,15 @@
 swagger: "2.0"
 info:
-  description: "API for accessing and interacting with sDAS utility and metadata."
+  description: "API for managing dataset configuration and performing acquisitions."
   version: "1.0.0"
-  title: "stock Data Acquisition Service (sDAS) API"
+  title: "Python Data Acquisition Service API"
 host: "localhost:5000"
 basePath: "/api/v1"
 tags:
   - name: "acquire"
     description: "Communication pipeline to retrieve data at runtime"
   - name: "configuration"
-    description: "sDAS configuration attributes that controls system functionality"
+    description: "pyDAS configuration attributes that controls system functionality"
   - name: "companies"
     description: "Companies that can have data acquired for"
   - name: "company features"
@@ -21,7 +21,7 @@ tags:
   - name: "options"
     description: "Feature options that add extra configuration for data acquisition"
   - name: "statistics"
-    description: "sDAS system statistics of data acquired"
+    description: "pyDAS system statistics of data acquired"
 schemes:
   - "http"
 securityDefinitions:
@@ -64,7 +64,7 @@ paths:
     get:
       tags:
         - "configuration"
-      summary: "Retrieves all sDAS configuration attributes"
+      summary: "Retrieves all pyDAS configuration attributes"
       description: ""
       operationId: "getConfigurations"
       produces:
@@ -690,7 +690,7 @@ paths:
 definitions:
   Configuration:
     type: object
-    description: "sDAS functionality attributes"
+    description: "pyDAS functionality attributes"
     required:
       - "name"
       - "type"

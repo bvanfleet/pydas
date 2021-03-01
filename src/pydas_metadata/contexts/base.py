@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from pydas_metadata import models
 
@@ -33,7 +33,7 @@ class BaseContext(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_session_maker(self):
+    def get_session(self) -> Session:
         '''
         Returns the data store connection session. Must be implemented in a derived class.
 
@@ -45,8 +45,7 @@ class BaseContext(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def get_configuration(self, name: str) -> models.Configuration:
-        session_maker = self.get_session_maker()
-        session = session_maker()
+        session = self.get_session()
         query = session.query(models.Configuration).filter(
             models.Configuration.name == name)
         return query.first()

@@ -1,26 +1,30 @@
+from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, request, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Feature, Handler
 
-from pydas import constants
-from pydas import scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas import constants, scopes
+from pydas.containers import ApplicationContainer
+from pydas.routes.utils import verify_scopes
 
 feature_bp = Blueprint('features',
                        'pydas.routes.feature',
                        url_prefix='/api/v1/features')
 
 
-@feature_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-@verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ, constants.HTTP_POST: scopes.FEATURES_WRITE})
-def index():
+@feature_bp.route(constants.BASE_PATH,
+                  methods=[constants.HTTP_GET, constants.HTTP_POST])
+@verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ,
+                constants.HTTP_POST: scopes.FEATURES_WRITE})
+@inject
+def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """Handler for base level URI for the features endpoint.
     Supports GET and POST methods for interacting."""
-    session = get_session()
-
+    session = metadata_context.get_session()
     if request.method == constants.HTTP_GET:
         query = session.query(Feature)
         features = query.all()
@@ -41,12 +45,17 @@ def index():
     return jsonify(json(new_feature)), 201
 
 
-@feature_bp.route('/<feature_name>', methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
-@verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ, constants.HTTP_PATCH: scopes.FEATURES_WRITE, constants.HTTP_DELETE: scopes.FEATURES_DELETE})
-def feature_index(feature_name):
+@feature_bp.route('/<feature_name>',
+                  methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
+@verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ,
+                constants.HTTP_PATCH: scopes.FEATURES_WRITE,
+                constants.HTTP_DELETE: scopes.FEATURES_DELETE})
+@inject
+def feature_index(feature_name: str,
+                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """Handler for individual feature level URI of the features endpoint.
     Supports GET, PATCH, and DELETE methods for interacting."""
-    session = get_session()
+    session = metadata_context.get_session()
     query = session.query(Feature).filter(Feature.name == feature_name)
 
     try:

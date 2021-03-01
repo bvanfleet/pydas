@@ -1,0 +1,44 @@
+testing: false
+
+database:
+    dialect: mysql
+    hostname: localhost
+    port: 3306
+    initial_catalog: pydasadmin
+    username: root
+
+alembic:
+    script_location: src/metadata/migrations
+    output_encoding: utf-8
+
+    # If you are not intending to pass commend-line arguments to the installation
+    # script, uncomment the following line and setup the database connection string.
+    # sqlalchemy_url: DRIVER://user:pass@host/dbname
+
+logging:
+    version: 1
+
+    root:
+        level: INFO
+        handlers: [log_file, console]
+
+    handlers:
+        console:
+            class: logging.StreamHandler
+            level: INFO
+            stream: ext://sys.stdout
+            formatter: generic
+
+        log_file:
+            class: logging.FileHandler
+            level: DEBUG
+            filename: 'logs/pydas.log'
+            formatter: file
+
+    formatters:
+        generic:
+            format: '%(levelname)-8s [pydas] %(message)s'
+            datefmt: '%H:%M:%S'
+
+        file:
+            format: '%(asctime)s:%(levelname)s:%(name)s:%(message)s'

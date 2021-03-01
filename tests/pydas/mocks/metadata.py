@@ -12,11 +12,8 @@ class MockContext(BaseContext):
     def can_handle(cls, context_type):
         return context_type == "mock"
 
-    def get_session_maker(self):
-        def mock_session_maker():
-            return MockSession()
-
-        return mock_session_maker
+    def get_session(self):
+        return MockSession()
 
     @classmethod
     def setup(cls, model: object, **query_config):

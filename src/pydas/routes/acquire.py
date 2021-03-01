@@ -1,19 +1,22 @@
 from datetime import datetime
 from functools import reduce
+import logging
 from typing import Any
 
-from flask import (Blueprint, make_response, jsonify,
-                   request, send_file, current_app)
+from dependency_injector.wiring import inject, Provide
+from flask import Blueprint, make_response, jsonify, request, send_file
 from sqlalchemy.orm.exc import NoResultFound
 
 from pydas_metadata import json
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Company, Configuration, FeatureToggle, Option
 
 from pydas import constants, scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas.routes.utils import verify_scopes
 from pydas.signals import SignalFactory
 from pydas.clients.iex import IexClient
 from pydas.constants import FeatureToggles
+from pydas.containers import ApplicationContainer
 from pydas.formatters import BaseFormatter, FormatterFactory
 
 # Disable the call to current_app._get_current_object as it's recommended by Flask
@@ -30,7 +33,9 @@ functionality for dataset generation.
 
 @acquire_bp.route('/<company_symbol>', methods=[constants.HTTP_GET])
 @verify_scopes({constants.HTTP_GET: scopes.ACQUIRE_READ})
-def acquire(company_symbol):
+@inject
+def acquire(company_symbol,
+            metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """
     Provides API function for dataset generation.
 
@@ -51,14 +56,14 @@ def acquire(company_symbol):
     sqlalchemy.exc.OperationalError:
         Thrown if there is an issue communicating with the metadata database.
     """
-    session = get_session()
+    session = metadata_context.get_session()
+
     query = session.query(Company).filter(Company.symbol == company_symbol)
     event_handler = session.query(FeatureToggle).filter(
         FeatureToggle.name == FeatureToggles.event_handlers).one_or_none()
     if event_handler.is_enabled is True:
-        current_app.logger.info("Signalling pre-acquisition event handlers")
+        logging.info("Signalling pre-acquisition event handlers")
         SignalFactory.pre_acquisition.send(
-            sender=current_app._get_current_object(),
             company_symbol=company_symbol,
             start_date=datetime.now().isoformat())
 
@@ -66,25 +71,23 @@ def acquire(company_symbol):
 
     api_key = session.query(Configuration).filter(
         Configuration.name == 'apiKey').one()
-    current_app.logger.debug("Creating IEX client with API Key: %s",
-                             api_key.value_text)
+    logging.debug("Creating IEX client with API Key: %s",
+                  api_key.value_text)
     client = IexClient(api_key.value_text)
 
     try:
         if event_handler.is_enabled is True:
-            current_app.logger.info("Signalling pre-company event handlers")
+            logging.info("Signalling pre-company event handlers")
             SignalFactory.pre_company.send(
-                sender=current_app._get_current_object(),
                 company_symbol=company_symbol,
                 start_date=datetime.now().isoformat())
 
         company = query.one()
         for feature in company.features:
             if event_handler.is_enabled is True:
-                current_app.logger.info(
+                logging.info(
                     "Signalling pre-feature event handlers")
                 SignalFactory.pre_feature.send(
-                    sender=current_app._get_current_object(),
                     company_symbol=company.symbol,
                     feature_name=feature.name,
                     start_date=datetime.now().isoformat())
@@ -92,47 +95,45 @@ def acquire(company_symbol):
             feature_option = session.query(Option).filter(Option.company_symbol == company.symbol,
                                                           Option.feature_name == feature.name).all()
             option = [json(option) for option in feature_option]
-            current_app.logger.info(
+            logging.info(
                 'Retrieved mapped options: [%s]',
                 (" ").join([json(option, True) for option in feature_option]))
 
             # TODO: Determine if this could/should be moved into source-aware code
             if feature.handler_meta.name == "tech_indicators_handler" and not option:
-                current_app.logger.info(
+                logging.info(
                     'Adding missing option on technical indicator')
                 option.append({"feature_name": feature.name,
                                "name": "range",
                                "value": "1m"})
 
-            current_app.logger.info('Acquiring feature data')
+            logging.info('Acquiring feature data')
             data = client.get_feature_data(feature, company, option)
             if isinstance(data, list):
                 results[feature.name] = feature.get_values(data)
             elif isinstance(data, dict):
                 results[feature.name] = [feature.get_value(data)]
-            current_app.logger.info(
+            logging.info(
                 "Acquired %d rows", len(results[feature.name]))
 
             if event_handler.is_enabled is True:
-                current_app.logger.info(
+                logging.info(
                     "Signalling post-feature event handlers")
                 SignalFactory.post_feature.send(
-                    sender=current_app._get_current_object(),
                     company_symbol=company.symbol,
                     feature_name=feature.name,
                     feature_rows=len(results[feature.name]),
                     end_date=datetime.now().isoformat())
 
-        current_app.logger.info("Transforming results info JSON structure")
+        logging.info("Transforming results info JSON structure")
         formatter: BaseFormatter = FormatterFactory.get_formatter('json')
         results = formatter.transform(results)
         if event_handler.is_enabled is True:
-            current_app.logger.info("Signalling post-company event handlers")
+            logging.info("Signalling post-company event handlers")
             count = reduce(lambda total, iter: total + len(iter),
                            results['values'],
                            0)
             SignalFactory.post_company.send(
-                sender=current_app._get_current_object(),
                 company_symbol=company.symbol,
                 data=results,
                 total_rows=count,
@@ -141,8 +142,8 @@ def acquire(company_symbol):
         format_options = request.args
         format_options_dict = {}
         if 'format' in format_options:
-            current_app.logger.info('Applying additional output formatting with type %s',
-                                    format_options['format'])
+            logging.info('Applying additional output formatting with type %s',
+                         format_options['format'])
             output_format = request.args['format']
 
             format_options_dict['output_path'] = __get_output_configuration(
@@ -168,8 +169,8 @@ def acquire(company_symbol):
                 'OutputFileHasHeaderRow',
                 session)
             try:
-                current_app.logger.info("Transforming result set and saving to %s",
-                                        format_options_dict['output_path'])
+                logging.info("Transforming result set and saving to %s",
+                             format_options_dict['output_path'])
                 formatter = FormatterFactory.get_formatter(output_format)
                 format_result = formatter.transform(
                     results, **format_options_dict)
@@ -179,10 +180,9 @@ def acquire(company_symbol):
 
             if output_format.lower() == 'file':
                 if event_handler.is_enabled is True:
-                    current_app.logger.info(
+                    logging.info(
                         "Signalling post-acquisition event handlers")
                     SignalFactory.post_acquisition.send(
-                        sender=current_app._get_current_object(),
                         company_symbol=company.symbol,
                         end_date=datetime.now().isoformat(),
                         message='Completed data acquisition!',
@@ -192,10 +192,9 @@ def acquire(company_symbol):
                 return send_file(format_result, as_attachment=True, cache_timeout=0)
 
         if event_handler.is_enabled is True:
-            current_app.logger.info(
+            logging.info(
                 "Signalling post-acquisition event handlers")
             SignalFactory.post_acquisition.send(
-                sender=current_app._get_current_object(),
                 company_symbol=company.symbol,
                 end_date=datetime.now().isoformat(),
                 message='Completed data acquisition!',

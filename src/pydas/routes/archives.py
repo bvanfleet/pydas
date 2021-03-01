@@ -1,18 +1,19 @@
 import logging
 
+from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, make_response, request, abort
 from flask.json import jsonify
 from werkzeug.datastructures import FileStorage
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from pydas_metadata import json
-from pydas_metadata.contexts import DatabaseContext
+from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Archive, Configuration
 
 from pydas import constants
 from pydas import scopes
-from pydas.routes.utils import get_session, verify_scopes
+from pydas.containers import ApplicationContainer
+from pydas.routes.utils import verify_scopes
 from pydas.archive import download_archive, upload_archive
 
 archives_bp = Blueprint('archives',
@@ -21,8 +22,10 @@ archives_bp = Blueprint('archives',
 
 
 @archives_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-def index():
-    session = get_session()
+@verify_scopes({constants.HTTP_GET: scopes.ARCHIVES_READ, constants.HTTP_POST: scopes.ARCHIVES_WRITE})
+@inject
+def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
 
     if request.method == constants.HTTP_GET:
         logging.info("Fetching archive metadata from sDAS database")
@@ -33,8 +36,7 @@ def index():
         # Handling file upload in IPFS
         logging.info("Handling archive file upload request")
         file: FileStorage = request.files['dataset']
-        context = DatabaseContext('pydasadmin', 'root')
-        connection_string = context.get_configuration(
+        connection_string = metadata_context.get_configuration(
             'archiveIpfsConnectionString')
         if connection_string is None:
             logging.error(
@@ -45,7 +47,7 @@ def index():
         logging.info("Uploading archive")
         archive = upload_archive(file.stream.read(),
                                  connection_string.value,
-                                 context,
+                                 metadata_context,
                                  company_symbols=symbols)
     else:
         # Support registering existing dataset metadata within sDAS
@@ -66,8 +68,10 @@ def index():
 
 
 @archives_bp.route('/<archive_address>', methods=[constants.HTTP_GET])
-def archive_index(archive_address):
-    session = get_session()
+@inject
+def archive_index(archive_address: str,
+                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     try:
         archive = session.query(Archive).filter(
             Archive.address == archive_address).one()
@@ -81,8 +85,10 @@ def archive_index(archive_address):
 
 
 @archives_bp.route('/<archive_address>/download', methods=[constants.HTTP_GET])
-def archive_data(archive_address):
-    session = get_session()
+@inject
+def archive_data(archive_address: str,
+                 metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    session = metadata_context.get_session()
     connection_string = session.query(Configuration).filter(
         Configuration.name == 'archiveIpfsConnectionString').one_or_none()
     if connection_string is None:
