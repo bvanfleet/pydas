@@ -29,10 +29,10 @@ jobs:
         run: sudo systemctl start mysql.service
 
       - name: Build sDAS and Metadata Packages
-        run: python setup.py bdist_wheel
+        run: python setup.py install
 
-      - name: Install Packages
-        run: pip install dist/*.whl
+      - name: Build sDAS and Metadata Packages
+        run: python setup.py bdist_wheel
 
       - name: Run Unit Tests
         run: python -m unittest -v
