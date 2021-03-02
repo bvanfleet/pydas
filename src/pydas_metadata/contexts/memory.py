@@ -1,4 +1,7 @@
+from contextlib import contextmanager
+
 from sqlalchemy.engine import create_engine
+from sqlalchemy.orm import Session
 
 from pydas_metadata.contexts.base import BaseContext, session_factory
 
@@ -44,6 +47,15 @@ class MemoryContext(BaseContext):
     def can_handle(cls, context_type: str) -> bool:
         return context_type == 'sqlite'
 
+    @contextmanager
     def get_session(self):
         """Returns a Session factory object for connecting to the database"""
-        return session_factory()
+        try:
+            session: Session = session_factory()
+            yield session
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()

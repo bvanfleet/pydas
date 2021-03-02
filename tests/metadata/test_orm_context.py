@@ -11,12 +11,11 @@ class TestOrmContext(unittest.TestCase):
         context = DatabaseContext('pydasadmin', 'root')
 
         # act
-        session = context.get_session()
-
-        # assert
-        self.assertIsNotNone(
-            session,
-            "Expected the session returned from the context session factory to not be None.")
+        with context.get_session() as session:
+            # assert
+            self.assertIsNotNone(
+                session,
+                "Expected the session returned from the context session factory to not be None.")
 
     def test_get_config(self):
         # arrange
@@ -27,9 +26,9 @@ class TestOrmContext(unittest.TestCase):
 
         context = MemoryContext()
         Base.metadata.create_all(context.engine)
-        session = context.get_session()
-        session.add(Configuration(name='test1', type='str', value_text='foo'))
-        session.commit()
+        with context.get_session() as session:
+            session.add(Configuration(
+                name='test1', type='str', value_text='foo'))
 
         for case in cases:
             with self.subTest(name=case['name'], is_none=case['is_none']):
@@ -41,3 +40,4 @@ class TestOrmContext(unittest.TestCase):
                     self.assertIsNone(config)
                 else:
                     self.assertIsNotNone(config)
+                    self.assertEqual(config, 'foo')

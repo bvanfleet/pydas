@@ -54,7 +54,7 @@ class TestConfigurationModel(unittest.TestCase):
         test_cases = [
             ('str', 'abc'),
             ('bytes', 'some bytes'),
-            ('bool', 'true')
+            ('bool', True)
         ]
 
         for case in test_cases:

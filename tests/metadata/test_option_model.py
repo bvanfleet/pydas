@@ -26,6 +26,31 @@ class TestOption(unittest.TestCase):
         self.assertEqual("Black", option.value)
         self.assertIsInstance(option.value, str)
 
+    def test_bool_value(self):
+        # arrange
+        test_cases = {
+            "true": True,
+            "TRUE": True,
+            "True": True,
+            "False": False,
+            "false": False,
+            "StrValue": False
+        }
+
+        for case in test_cases:
+            with self.subTest(value=case[0], expected=case[1]):
+                # arrange
+                option = Option(name="is_enabled",
+                                option_type="bool",
+                                value_text=case[0])
+
+                # act
+                result = option.value
+
+                #  assert
+                self.assertEqual(case[1], result)
+                self.assertIsInstance(result, bool)
+
     def test_json(self):
         # arrange
         expected_output = {

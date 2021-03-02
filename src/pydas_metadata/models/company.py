@@ -1,8 +1,11 @@
+from typing import List
+
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 from pydas_metadata.models.base import Base
 from pydas_metadata.models.company_feature import CompanyFeatureMap
+from pydas_metadata.models.feature import Feature
 
 
 class Company(Base):
@@ -31,8 +34,8 @@ class Company(Base):
     name: str = Column('Name', String)
     market: str = Column('Market', String)
 
-    features: list = relationship('Feature',
-                                  secondary=CompanyFeatureMap)
+    features: List[Feature] = relationship('Feature',
+                                           secondary=CompanyFeatureMap)
 
     def __str__(self):
         return f'{self.symbol}, {self.name}, {self.market}'

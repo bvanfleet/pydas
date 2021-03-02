@@ -50,25 +50,25 @@ class SignalFactory:
     def register_signals(cls, metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
         """Registers a new event handler with the signalling factory."""
         logging.debug('Registering signals...')
-        session = metadata_context.get_session()
-        signals: List[EventHandler] = session.query(EventHandler).all()
-        for signal in signals:
-            if not signal.is_enabled:
-                continue
+        with metadata_context.get_session() as session:
+            signals: List[EventHandler] = session.query(EventHandler).all()
+            for signal in signals:
+                if not signal.is_enabled:
+                    continue
 
-            logging.debug('Registering signal: %s', signal.name)
-            try:
-                cls.__map_signal(signal)
-            except KeyError as exc:
-                logging.warning(
-                    "Unable to register handler '%s': %s", signal.name, exc)
-                continue
-            except ImportError as exc:
-                logging.warning(exc)
-                continue
+                logging.debug('Registering signal: %s', signal.name)
+                try:
+                    cls.__map_signal(signal)
+                except KeyError as exc:
+                    logging.warning(
+                        "Unable to register handler '%s': %s", signal.name, exc)
+                    continue
+                except ImportError as exc:
+                    logging.warning(exc)
+                    continue
 
-            logging.info('Registered signal: %s', signal.name)
-            cls.signals.append(signal)
+                logging.info('Registered signal: %s', signal.name)
+                cls.signals.append(signal)
 
         logging.debug('Signals registered!')
 

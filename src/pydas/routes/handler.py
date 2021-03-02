@@ -24,8 +24,6 @@ handler_bp = Blueprint('handlers',
 @inject
 def handlers_index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """Retrieves all handlers from data store and returns a JSON array response object."""
-    session = metadata_context.get_session()
-    query = session.query(Handler)
-    handlers = query.all()
-
-    return jsonify([json(handler) for handler in handlers])
+    with metadata_context.get_session() as session:
+        handlers = session.query(Handler).all()
+        return jsonify([json(handler) for handler in handlers])

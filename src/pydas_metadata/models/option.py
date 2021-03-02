@@ -51,6 +51,9 @@ class Option(Base):
         if self.option_type in self._supported_number_types:
             return self.value_number
 
+        if self.option_type == 'bool':
+            return self.value_text.lower() == 'true'
+
         return self.value_text
 
     @value.setter

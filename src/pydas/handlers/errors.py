@@ -4,7 +4,6 @@ from dependency_injector.wiring import inject, Provide
 from flask import json, request
 
 from pydas_metadata.contexts import BaseContext
-from pydas_metadata.models import FeatureToggle
 
 from pydas.signals import SignalFactory
 from pydas.constants import FeatureToggles
@@ -15,10 +14,9 @@ from pydas.containers import ApplicationContainer
 def handle_base_server_error(error,
                              metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     logging.info("Handling base server error")
-    session = metadata_context.get_session()
-    feature_toggle = session.query(FeatureToggle).filter(
-        FeatureToggle.name == FeatureToggles.event_handlers).one_or_none()
-    if feature_toggle.is_enabled is True:
+    should_handle_events = metadata_context.get_feature_toggle(
+        FeatureToggles.event_handlers)
+    if should_handle_events is True:
         # Send the on_error signal
         logging.debug("Signalling on-error event handlers")
         SignalFactory.on_error.send(

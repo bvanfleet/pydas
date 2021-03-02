@@ -38,7 +38,6 @@ def upload_archive(dataset, connection_string: str, context: BaseContext, **kwar
         Raised if the dataset is not of type ``dict`` or ``bytes``.
     """
     client = IpfsArchiveClient(connection_string)
-    session = context.get_session_maker()()
     if isinstance(dataset, dict):
         address = client.upload(dataset)
     elif isinstance(dataset, bytes):
@@ -47,24 +46,25 @@ def upload_archive(dataset, connection_string: str, context: BaseContext, **kwar
         raise TypeError(
             'Dataset to be uploaded must be a dictionary or bytes.')
 
-    archive: Archive = session.query(Archive).filter(
-        Archive.address == address).one_or_none()
-    if archive is not None:
-        logging.warning(
-            'Found matching dataset in IPFS at address: %s.', address)
-        company = kwargs['company_symbols'] if 'company_symbols' in kwargs else ''
-        if company != '':
-            logging.debug('Tagging company with symbol "%s"', company)
-            archive.add_company(company)
-    else:
-        logging.debug('Uploaded dataset to IPFS at address: %s', address)
-        symbols = kwargs['company_symbols'] if 'company_symbols' in kwargs else ''
-        archive = Archive(address=address,
-                          filename=f'dataset_{datetime.now().date().isoformat()}.json',
-                          company_symbols=symbols)
+    with context.get_session() as session:
+        archive: Archive = session.query(Archive).filter(
+            Archive.address == address).one_or_none()
+        if archive is not None:
+            logging.warning(
+                'Found matching dataset in IPFS at address: %s.', address)
+            company = kwargs['company_symbols'] if 'company_symbols' in kwargs else ''
+            if company != '':
+                logging.debug('Tagging company with symbol "%s"', company)
+                archive.add_company(company)
+        else:
+            logging.debug('Uploaded dataset to IPFS at address: %s', address)
+            symbols = kwargs['company_symbols'] if 'company_symbols' in kwargs else ''
+            archive = Archive(address=address,
+                              filename=f'dataset_{datetime.now().date().isoformat()}.json',
+                              company_symbols=symbols)
 
-    session.add(archive)
-    session.commit()
+        session.add(archive)
+
     return archive
 
 

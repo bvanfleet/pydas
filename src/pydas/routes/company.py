@@ -25,20 +25,18 @@ company_bp = Blueprint('companies',
                request)
 @inject
 def companies_index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(Company)
-
     if request.method == constants.HTTP_GET:
-        companies = query.all()
-        return jsonify([json(company) for company in companies])
+        with metadata_context.get_session() as session:
+            companies = session.query(Company).all()
+            return jsonify([json(company) for company in companies])
 
     request_company = request.get_json()
-    new_company = Company(symbol=request_company['symbol'],
-                          name=request_company['name'],
-                          market=request_company['market'])
+    with metadata_context.get_session() as session:
+        new_company = Company(symbol=request_company['symbol'],
+                              name=request_company['name'],
+                              market=request_company['market'])
+        session.add(new_company)
 
-    session.add(new_company)
-    session.commit()
     return jsonify(json(new_company)), 201
 
 
@@ -52,29 +50,27 @@ def companies_index(metadata_context: BaseContext = Provide[ApplicationContainer
 @inject
 def get_company(company_symbol: str,
                 metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(Company).filter(Company.symbol == company_symbol)
     try:
-        company = query.one()
-        if request.method == constants.HTTP_GET:
+        with metadata_context.get_session() as session:
+            company = session.query(Company).filter(
+                Company.symbol == company_symbol).one()
+            if request.method == constants.HTTP_GET:
+                return jsonify(json(company))
+
+            if request.method == constants.HTTP_DELETE:
+                session.delete(company)
+                return '', 204
+
+            request_company = request.get_json()
+            if request_company['symbol'] != company.symbol:
+                return make_response(
+                    'Error: Request body does not match the company referenced', 400)
+
+            company.symbol = request_company['symbol']
+            company.name = request_company['name']
+            company.market = request_company['market']
+            session.add(company)
             return jsonify(json(company))
-
-        if request.method == constants.HTTP_DELETE:
-            session.delete(company)
-            session.commit()
-            return '', 204
-
-        # Patch Logic
-        request_company = request.get_json()
-        if request_company['symbol'] != company.symbol:
-            return make_response('Error: Request body does not match the company referenced', 400)
-
-        company.symbol = request_company['symbol']
-        company.name = request_company['name']
-        company.market = request_company['market']
-        session.add(company)
-        session.commit()
-        return jsonify(json(company))
     except NoResultFound:
         response = make_response(
             'Cannot find company requested', 404)
@@ -89,26 +85,21 @@ def get_company(company_symbol: str,
 @inject
 def company_features_index(company_symbol: str,
                            metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(Company).filter(Company.symbol == company_symbol)
     try:
-        company = query.one()
+        with metadata_context.get_session() as session:
+            company = session.query(Company).filter(
+                Company.symbol == company_symbol).one()
 
-        if request.method == constants.HTTP_GET:
-            return jsonify([json(feature) for feature in company.features])
+            if request.method == constants.HTTP_GET:
+                return jsonify([json(feature) for feature in company.features])
 
-        request_map = request.get_json()
-        print(request_map)
-        feature = session.query(Feature).filter(
-            Feature.name == request_map['name']).one()
-        print(feature)
-        company.features.append(feature)
+            request_map = request.get_json()
+            feature = session.query(Feature).filter(
+                Feature.name == request_map['name']).one()
+            company.features.append(feature)
+            session.add(company)
 
-        session.add(company)
-        session.commit()
-        print('committed change')
-
-        return jsonify([json(feature) for feature in company.features]), 201
+            return jsonify([json(feature) for feature in company.features]), 201
     except NoResultFound:
         response = make_response(
             'Cannot find company or feature requested', 404)
@@ -125,28 +116,24 @@ def company_features_index(company_symbol: str,
 def company_feature_index(company_symbol: str,
                           feature_name: str,
                           metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    c_query = session.query(Company).filter(Company.symbol == company_symbol)
     try:
-        company = c_query.one()
-        if request.method == constants.HTTP_DELETE:
-            f_query = session.query(Feature).filter(
-                Feature.name == feature_name)
-            feature = f_query.one()
+        with metadata_context.get_session() as session:
+            company = session.query(Company).filter(
+                Company.symbol == company_symbol).one()
 
-            company.features.remove(feature)
+            if request.method == constants.HTTP_DELETE:
+                feature = session.query(Feature).filter(
+                    Feature.name == feature_name).one()
+                company.features.remove(feature)
+                session.add(company)
+                return '', 204
 
-            session.add(company)
-            session.commit()
-            return '', 204
+            for feature in company.features:
+                if feature.name == feature_name:
+                    return jsonify(json(feature))
 
-        for feature in company.features:
-            if feature.name == feature_name:
-                return jsonify(json(feature))
-
-        response = make_response(
-            'Cannot find feature requested', 404)
-        return response
+            response = make_response('Cannot find feature requested', 404)
+            return response
     except NoResultFound:
         response = make_response(
             'Cannot find company or feature requested', 404)
@@ -163,12 +150,12 @@ def company_feature_index(company_symbol: str,
 def options_index(company_symbol: str,
                   feature_name: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
     if request.method == constants.HTTP_GET:
-        query = session.query(Option).filter(
-            Option.company_symbol == company_symbol,
-            Option.feature_name == feature_name)
-        options = query.all()
+        with metadata_context.get_session() as session:
+            query = session.query(Option).filter(
+                Option.company_symbol == company_symbol,
+                Option.feature_name == feature_name)
+            options = query.all()
 
         return jsonify([json(option) for option in options])
 
@@ -177,14 +164,14 @@ def options_index(company_symbol: str,
     option_value = (request_option['value_text']
                     if 'value_text' in request_option
                     else request_option['value'])
-    new_option = Option(name=request_option['name'],
-                        company_symbol=request_option['company_symbol'],
-                        feature_name=request_option['feature_name'],
-                        option_type=request_option['option_type'],
-                        value_text=option_value,
-                        value_number=request_option['value_number'])
-    session.add(new_option)
-    session.commit()
+    with metadata_context.get_session() as session:
+        new_option = Option(name=request_option['name'],
+                            company_symbol=request_option['company_symbol'],
+                            feature_name=request_option['feature_name'],
+                            option_type=request_option['option_type'],
+                            value_text=option_value,
+                            value_number=request_option['value_number'])
+        session.add(new_option)
 
     return jsonify(json(new_option)), 201
 
@@ -201,39 +188,36 @@ def option_index(company_symbol: str,
                  feature_name: str,
                  option_name: str,
                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(Option).filter(
-        Option.company_symbol == company_symbol,
-        Option.feature_name == feature_name,
-        Option.name == option_name)
-
     try:
-        option = query.one()
-        if request.method == constants.HTTP_GET:
+        with metadata_context.get_session() as session:
+            query = session.query(Option).filter(
+                Option.company_symbol == company_symbol,
+                Option.feature_name == feature_name,
+                Option.name == option_name)
+            option = query.one()
+            if request.method == constants.HTTP_GET:
+                return jsonify(json(option))
+
+            if request.method == constants.HTTP_DELETE:
+                session.delete(option)
+                return '', 204
+
+            request_option = request.get_json()
+            if request_option['name'] != option.name:
+                return make_response(
+                    'Error: Request body does not match the option referenced', 400)
+
+            option_value = (request_option['value_text']
+                            if 'value_text' in request_option
+                            else request_option['value'])
+            company_symbol = request_option['company_symbol']
+            feature_name = request_option['feature_name']
+            option.option_type = request_option['option_type']
+            option.value_text = option_value
+            option.value_number = request_option['value_number']
+            session.add(option)
+
             return jsonify(json(option))
-
-        if request.method == constants.HTTP_DELETE:
-            session.delete(option)
-            session.commit()
-            return '', 204
-
-        # Patch Logic
-        request_option = request.get_json()
-        if request_option['name'] != option.name:
-            return make_response('Error: Request body does not match the option referenced', 400)
-
-        option_value = (request_option['value_text']
-                        if 'value_text' in request_option
-                        else request_option['value'])
-        company_symbol = request_option['company_symbol']
-        feature_name = request_option['feature_name']
-        option.option_type = request_option['option_type']
-        option.value_text = option_value
-        option.value_number = request_option['value_number']
-        session.add(option)
-        session.commit()
-        return jsonify(json(option))
     except NoResultFound:
-        response = make_response(
-            'Cannot find option requested', 404)
+        response = make_response('Cannot find option requested', 404)
         return response
