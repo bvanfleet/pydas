@@ -18,7 +18,7 @@ def get_extra_requires(path, add_all=True):
                     k, v = k.split(':')
                     tags.update(vv.strip() for vv in v.split(','))
                 for t in tags:
-                    extra_deps[t].add(k)
+                    extra_deps[t].add(k.strip())
 
         # add tag `all` at the end
         if add_all:
