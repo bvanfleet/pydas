@@ -1,6 +1,5 @@
 import unittest
 
-from pydas_metadata.contexts import ContextFactory
 from pydas_metadata.models import Handler
 from tests.pydas.mocks import MockContext
 from tests.pydas.fixtures import app_client
@@ -11,7 +10,6 @@ class TestHandlerRoute(unittest.TestCase):
 
     def setUp(self):
         self.client = app_client()
-        ContextFactory.supported_contexts += (MockContext,)
 
     def test_get_index(self):
         # arrange
