@@ -1,15 +1,17 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, request, make_response
+from flask import Blueprint, current_app, make_response, request
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
+
+from pydas_auth import scopes
+from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Company, Feature, Option
 
-from pydas import constants, scopes
+from pydas import constants
 from pydas.containers import ApplicationContainer
-from pydas.routes.utils import verify_scopes
 
 company_bp = Blueprint('companies',
                        'pydas.routes.companies',
@@ -17,7 +19,10 @@ company_bp = Blueprint('companies',
 
 
 @company_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_POST: scopes.COMPANIES_WRITE})
+@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
+                constants.HTTP_POST: scopes.COMPANIES_WRITE},
+               current_app,
+               request)
 @inject
 def companies_index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     session = metadata_context.get_session()
@@ -37,8 +42,13 @@ def companies_index(metadata_context: BaseContext = Provide[ApplicationContainer
     return jsonify(json(new_company)), 201
 
 
-@company_bp.route('/<company_symbol>', methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
-@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_PATCH: scopes.COMPANIES_WRITE, constants.HTTP_DELETE: scopes.COMPANIES_DELETE})
+@company_bp.route('/<company_symbol>',
+                  methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
+@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
+                constants.HTTP_PATCH: scopes.COMPANIES_WRITE,
+                constants.HTTP_DELETE: scopes.COMPANIES_DELETE},
+               current_app,
+               request)
 @inject
 def get_company(company_symbol: str,
                 metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
@@ -72,7 +82,10 @@ def get_company(company_symbol: str,
 
 
 @company_bp.route('/<company_symbol>/features', methods=[constants.HTTP_GET, constants.HTTP_POST])
-@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_POST: scopes.COMPANIES_WRITE})
+@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
+                constants.HTTP_POST: scopes.COMPANIES_WRITE},
+               current_app,
+               request)
 @inject
 def company_features_index(company_symbol: str,
                            metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
@@ -102,8 +115,12 @@ def company_features_index(company_symbol: str,
         return response
 
 
-@company_bp.route('/<company_symbol>/features/<feature_name>', methods=[constants.HTTP_GET, constants.HTTP_DELETE])
-@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_DELETE: scopes.COMPANIES_DELETE})
+@company_bp.route('/<company_symbol>/features/<feature_name>',
+                  methods=[constants.HTTP_GET, constants.HTTP_DELETE])
+@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
+                constants.HTTP_DELETE: scopes.COMPANIES_DELETE},
+               current_app,
+               request)
 @inject
 def company_feature_index(company_symbol: str,
                           feature_name: str,
@@ -136,8 +153,12 @@ def company_feature_index(company_symbol: str,
         return response
 
 
-@company_bp.route('/<company_symbol>/features/<feature_name>/options', methods=[constants.HTTP_GET, constants.HTTP_POST])
-@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_POST: scopes.COMPANIES_WRITE})
+@company_bp.route('/<company_symbol>/features/<feature_name>/options',
+                  methods=[constants.HTTP_GET, constants.HTTP_POST])
+@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
+                constants.HTTP_POST: scopes.COMPANIES_WRITE},
+               current_app,
+               request)
 @inject
 def options_index(company_symbol: str,
                   feature_name: str,
@@ -153,7 +174,9 @@ def options_index(company_symbol: str,
 
     request_option = request.get_json()
 
-    option_value = request_option['value_text'] if 'value_text' in request_option else request_option['value']
+    option_value = (request_option['value_text']
+                    if 'value_text' in request_option
+                    else request_option['value'])
     new_option = Option(name=request_option['name'],
                         company_symbol=request_option['company_symbol'],
                         feature_name=request_option['feature_name'],
@@ -166,8 +189,13 @@ def options_index(company_symbol: str,
     return jsonify(json(new_option)), 201
 
 
-@company_bp.route('/<company_symbol>/features/<feature_name>/options/<option_name>', methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
-@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ, constants.HTTP_PATCH: scopes.COMPANIES_WRITE, constants.HTTP_DELETE: scopes.COMPANIES_DELETE})
+@company_bp.route('/<company_symbol>/features/<feature_name>/options/<option_name>',
+                  methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
+@verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
+                constants.HTTP_PATCH: scopes.COMPANIES_WRITE,
+                constants.HTTP_DELETE: scopes.COMPANIES_DELETE},
+               current_app,
+               request)
 @inject
 def option_index(company_symbol: str,
                  feature_name: str,
@@ -194,7 +222,9 @@ def option_index(company_symbol: str,
         if request_option['name'] != option.name:
             return make_response('Error: Request body does not match the option referenced', 400)
 
-        option_value = request_option['value_text'] if 'value_text' in request_option else request_option['value']
+        option_value = (request_option['value_text']
+                        if 'value_text' in request_option
+                        else request_option['value'])
         company_symbol = request_option['company_symbol']
         feature_name = request_option['feature_name']
         option.option_type = request_option['option_type']

@@ -1,15 +1,17 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, request, make_response
+from flask import Blueprint, current_app, request, make_response
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
+
+from pydas_auth import scopes
+from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Feature, Handler
 
-from pydas import constants, scopes
+from pydas import constants
 from pydas.containers import ApplicationContainer
-from pydas.routes.utils import verify_scopes
 
 feature_bp = Blueprint('features',
                        'pydas.routes.feature',
@@ -19,7 +21,9 @@ feature_bp = Blueprint('features',
 @feature_bp.route(constants.BASE_PATH,
                   methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ,
-                constants.HTTP_POST: scopes.FEATURES_WRITE})
+                constants.HTTP_POST: scopes.FEATURES_WRITE},
+               current_app,
+               request)
 @inject
 def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     """Handler for base level URI for the features endpoint.
@@ -49,7 +53,9 @@ def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_f
                   methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.FEATURES_READ,
                 constants.HTTP_PATCH: scopes.FEATURES_WRITE,
-                constants.HTTP_DELETE: scopes.FEATURES_DELETE})
+                constants.HTTP_DELETE: scopes.FEATURES_DELETE},
+               current_app,
+               request)
 @inject
 def feature_index(feature_name: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):

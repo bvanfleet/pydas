@@ -9,8 +9,7 @@ from sqlalchemy.exc import OperationalError
 
 from pydas import routes, signals
 from pydas.containers import ApplicationContainer
-from pydas.handlers import handle_base_server_error
-from pydas.handlers import handle_database_error
+from pydas.handlers import errors
 from pydas.routes.swagger import SWAGGER_URL
 
 # pylint: disable=no-member,unused-variable
@@ -24,7 +23,8 @@ def create_app(config_filename: str = 'pydas.yaml'):
     app_container.config.from_yaml(config_filename)
     app_container.init_resources()
     app_container.wire(
-        modules=[routes.acquire,
+        modules=[errors,
+                 routes.acquire,
                  routes.archives,
                  routes.company,
                  routes.configuration,
@@ -52,8 +52,8 @@ def create_app(config_filename: str = 'pydas.yaml'):
     app.register_blueprint(routes.swaggerui_bp, url_prefix=SWAGGER_URL)
 
     # Additional error handler registrations
-    app.register_error_handler(OperationalError, handle_database_error)
-    app.register_error_handler(500, handle_base_server_error)
+    app.register_error_handler(OperationalError, errors.handle_database_error)
+    app.register_error_handler(500, errors.handle_base_server_error)
 
     @app.route(f'{SWAGGER_URL}/dist/swagger')
     def dist():
@@ -76,4 +76,4 @@ def create_app(config_filename: str = 'pydas.yaml'):
     return app
 
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"

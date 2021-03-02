@@ -1,20 +1,21 @@
 import logging
 
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, make_response, request, abort
+from flask import Blueprint, current_app, make_response, request, abort
 from flask.json import jsonify
-from werkzeug.datastructures import FileStorage
 from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.datastructures import FileStorage
+
+from pydas_auth import scopes
+from pydas_auth import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Archive, Configuration
 
 from pydas import constants
-from pydas import scopes
-from pydas.containers import ApplicationContainer
-from pydas.routes.utils import verify_scopes
 from pydas.archive import download_archive, upload_archive
+from pydas.containers import ApplicationContainer
 
 archives_bp = Blueprint('archives',
                         'pydas.routes.archives',
@@ -22,7 +23,10 @@ archives_bp = Blueprint('archives',
 
 
 @archives_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
-@verify_scopes({constants.HTTP_GET: scopes.ARCHIVES_READ, constants.HTTP_POST: scopes.ARCHIVES_WRITE})
+@verify_scopes({constants.HTTP_GET: scopes.ARCHIVES_READ,
+                constants.HTTP_POST: scopes.ARCHIVES_WRITE},
+               current_app,
+               request)
 @inject
 def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     session = metadata_context.get_session()
@@ -68,6 +72,9 @@ def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_f
 
 
 @archives_bp.route('/<archive_address>', methods=[constants.HTTP_GET])
+@verify_scopes({constants.HTTP_GET: scopes.ARCHIVES_READ},
+               current_app,
+               request)
 @inject
 def archive_index(archive_address: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
@@ -85,6 +92,9 @@ def archive_index(archive_address: str,
 
 
 @archives_bp.route('/<archive_address>/download', methods=[constants.HTTP_GET])
+@verify_scopes({constants.HTTP_GET: scopes.ARCHIVES_READ},
+               current_app,
+               request)
 @inject
 def archive_data(archive_address: str,
                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
