@@ -32,7 +32,7 @@ jobs:
         run: python setup.py bdist_wheel
 
       - name: Install pyDAS Packages
-        run: pip install --find-links=${{ env.DIST_PATH }} pydas
+        run: pip install --find-links=${{ env.DIST_PATH }} pydas[all]
 
       - name: Run Unit Tests
         run: python -m unittest -v
