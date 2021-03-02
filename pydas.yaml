@@ -15,6 +15,17 @@ alembic:
     # script, uncomment the following line and setup the database connection string.
     # sqlalchemy_url: DRIVER://user:pass@host/dbname
 
+# In order to utilize an external authentication provider, you'll need to configure
+# the credentials property. A partial example below is provided.
+# authentication:
+    # auth_provider: firestore
+    # credentials:
+    #     type: "service_account"
+    #     private_key:
+    #     auth_uri: "https://accounts.google.com/o/oauth2/auth"
+    #     token_uri: "https://oauth2.googleapis.com/token"
+    #     auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs"
+
 logging:
     version: 1
 
