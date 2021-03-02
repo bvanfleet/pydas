@@ -33,7 +33,7 @@ setup(
     install_requires=[
         "alembic==1.4.3",
         "blinker==1.4",
-        "dependency-injector==4.27.0",
+        "dependency-injector[yaml]==4.27.0",
         "Flask==1.1.2",
         "Flask-Cors==3.0.8",
         "flask-swagger-ui==3.25.0",
