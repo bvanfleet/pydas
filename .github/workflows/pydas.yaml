@@ -19,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.7
+          python-version: 3.8.5
           architecture: x64
 
       - name: Setup Python - Install Wheel
@@ -31,8 +31,8 @@ jobs:
       - name: Build sDAS and Metadata Packages
         run: python setup.py bdist_wheel
 
-      - name: Install Packages
-        run: pip install dist/*.whl
+      - name: Install pyDAS Packages
+        run: pip install --find-links=${{ env.DIST_PATH }} pydas[all]
 
       - name: Run Unit Tests
         run: python -m unittest -v
@@ -40,8 +40,10 @@ jobs:
       - name: Create empty database for installation
         run: mysql --host localhost -uroot -proot -e "CREATE DATABASE pydasadmin"
 
-      - name: Install sDAS (Server)
-        run: python -m pydas.install -a ./alembic.ini -u root -p root
+    #   I'm disabling this step as the pydas.install module is half-baked, at best. Once I get that module working
+    #   I'll go ahead and re-enable this to test installation functionality.
+    #   - name: Install pyDAS (Server)
+    #     run: python -m pydas.install -a ./alembic.ini -u root -p root
 
       - name: Publish Build Wheel Artifact
         uses: actions/upload-artifact@master
