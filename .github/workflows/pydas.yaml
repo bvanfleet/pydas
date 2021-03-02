@@ -31,6 +31,9 @@ jobs:
       - name: Build sDAS and Metadata Packages
         run: python setup.py bdist_wheel
 
+      - name: Install pyDAS Packages
+        run: pip install --find-links=${{ env.DIST_PATH }} pydas
+
       - name: Run Unit Tests
         run: python -m unittest -v
 
