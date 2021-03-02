@@ -1,15 +1,17 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, make_response, request
+from flask import Blueprint, current_app, make_response, request
 from flask.json import jsonify
 from sqlalchemy.orm.exc import NoResultFound
+
+from pydas_auth import scopes
+from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Configuration
 
-from pydas import constants, scopes
+from pydas import constants
 from pydas.containers import ApplicationContainer
-from pydas.routes.utils import verify_scopes
 
 configuration_bp = Blueprint('configuration',
                              'pydas.routes.configuration',
@@ -17,7 +19,9 @@ configuration_bp = Blueprint('configuration',
 
 
 @configuration_bp.route(constants.BASE_PATH)
-@verify_scopes({constants.HTTP_GET: scopes.CONFIGURATION_READ})
+@verify_scopes({constants.HTTP_GET: scopes.CONFIGURATION_READ},
+               current_app,
+               request)
 @inject
 def get_configuration(
         metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
@@ -28,15 +32,21 @@ def get_configuration(
     return jsonify([json(configuration) for configuration in configurations])
 
 
-@configuration_bp.route('/<configuration_name>', methods=[constants.HTTP_GET, constants.HTTP_PATCH])
-@verify_scopes({constants.HTTP_GET: scopes.CONFIGURATION_READ, constants.HTTP_PATCH: scopes.CONFIGURATION_WRITE})
+@configuration_bp.route('/<configuration_name>',
+                        methods=[constants.HTTP_GET, constants.HTTP_PATCH])
+@verify_scopes({constants.HTTP_GET: scopes.CONFIGURATION_READ,
+                constants.HTTP_PATCH: scopes.CONFIGURATION_WRITE},
+               current_app,
+               request)
 @inject
 def configuration_index(configuration_name: str,
                         metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+    """
+    Provides a read-write endpoint for working with a single configuration option.
+    """
     session = metadata_context.get_session()
     query = session.query(Configuration).filter(
         Configuration.name == configuration_name)
-
     try:
         configuration = query.one()
         if request.method == constants.HTTP_GET:

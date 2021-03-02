@@ -1,0 +1,49 @@
+name: Python Data Acquisition Service (pyDAS)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DIST_PATH: "dist"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.7
+          architecture: x64
+
+      - name: Setup Python - Install Wheel
+        run: pip install wheel
+
+      - name: Start Ubuntu MySQL (SUDO)
+        run: sudo systemctl start mysql.service
+
+      - name: Build sDAS and Metadata Packages
+        run: python setup.py bdist_wheel
+
+      - name: Install Packages
+        run: pip install dist/*.whl
+
+      - name: Run Unit Tests
+        run: python -m unittest -v
+
+      - name: Create empty database for installation
+        run: mysql --host localhost -uroot -proot -e "CREATE DATABASE pydasadmin"
+
+      - name: Install sDAS (Server)
+        run: python -m pydas.install -a ./alembic.ini -u root -p root
+
+      - name: Publish Build Wheel Artifact
+        uses: actions/upload-artifact@master
+        with:
+          path: ${{ env.DIST_PATH }}/*.whl

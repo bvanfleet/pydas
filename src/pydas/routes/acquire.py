@@ -4,20 +4,22 @@ import logging
 from typing import Any
 
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, make_response, jsonify, request, send_file
+from flask import Blueprint, current_app, make_response, jsonify, request, send_file
 from sqlalchemy.orm.exc import NoResultFound
+
+from pydas_auth import scopes
+from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Company, Configuration, FeatureToggle, Option
 
-from pydas import constants, scopes
-from pydas.routes.utils import verify_scopes
-from pydas.signals import SignalFactory
+from pydas import constants
 from pydas.clients.iex import IexClient
 from pydas.constants import FeatureToggles
 from pydas.containers import ApplicationContainer
 from pydas.formatters import BaseFormatter, FormatterFactory
+from pydas.signals import SignalFactory
 
 # Disable the call to current_app._get_current_object as it's recommended by Flask
 # pylint: disable=protected-access
@@ -25,14 +27,12 @@ from pydas.formatters import BaseFormatter, FormatterFactory
 acquire_bp = Blueprint('acquire',
                        'pydas.routes.acquire',
                        url_prefix='/api/v1/acquire')
-"""
-An acquisition blueprint that defines how the sDAS API provides REST
-functionality for dataset generation.
-"""
 
 
 @acquire_bp.route('/<company_symbol>', methods=[constants.HTTP_GET])
-@verify_scopes({constants.HTTP_GET: scopes.ACQUIRE_READ})
+@verify_scopes({constants.HTTP_GET: scopes.ACQUIRE_READ},
+               current_app,
+               request)
 @inject
 def acquire(company_symbol,
             metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):

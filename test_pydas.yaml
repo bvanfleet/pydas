@@ -1,0 +1,27 @@
+testing: true
+
+database:
+    dialect: mock
+
+alembic:
+    script_location: src/metadata/migrations
+    output_encoding: utf-8
+
+logging:
+    version: 1
+
+    root:
+        level: INFO
+        handlers: [console]
+
+    handlers:
+        console:
+            class: logging.StreamHandler
+            level: INFO
+            stream: ext://sys.stdout
+            formatter: generic
+
+    formatters:
+        generic:
+            format: '%(levelname)-8s [pydas] %(message)s'
+            datefmt: '%H:%M:%S'

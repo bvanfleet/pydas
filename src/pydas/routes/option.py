@@ -1,14 +1,16 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, request, make_response
+from flask import Blueprint, current_app, make_response, request
 from flask.json import jsonify
+
+from pydas_auth import scopes
+from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Option
 
-from pydas import constants, scopes
+from pydas import constants
 from pydas.containers import ApplicationContainer
-from pydas.routes.utils import verify_scopes
 
 option_bp = Blueprint('options',
                       'pydas.routes.option',
@@ -17,7 +19,9 @@ option_bp = Blueprint('options',
 
 @option_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.OPTIONS_READ,
-                constants.HTTP_POST: scopes.OPTIONS_WRITE})
+                constants.HTTP_POST: scopes.OPTIONS_WRITE},
+               current_app,
+               request)
 @inject
 def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     session = metadata_context.get_session()
@@ -42,7 +46,9 @@ def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_f
 
 
 @option_bp.route('/<option_name>', methods=[constants.HTTP_GET])
-@verify_scopes({constants.HTTP_GET: scopes.OPTIONS_READ})
+@verify_scopes({constants.HTTP_GET: scopes.OPTIONS_READ},
+               current_app,
+               request)
 @inject
 def option_index(option_name: str,
                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):

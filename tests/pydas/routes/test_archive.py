@@ -1,7 +1,6 @@
 from datetime import datetime
 import unittest
 
-from pydas_metadata.contexts import ContextFactory
 from pydas_metadata.models import Archive
 from tests.pydas.mocks import MockContext
 from tests.pydas.fixtures import app_client
@@ -12,7 +11,6 @@ class TestArchive(unittest.TestCase):
 
     def setUp(self):
         self.client = app_client()
-        ContextFactory.supported_contexts += (MockContext,)
 
     def test_get_index(self):
         # arrange

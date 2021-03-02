@@ -1,0 +1,28 @@
+# FORMAT
+# Put your extra requirements here in the following format
+#
+# package[version_required]: tag1, tag2, ...
+# This protocol was taken from Han Xiao, credit goes to him for this great idea.
+
+# aws - needed to Amazon's AWS S3 storage.
+# dev - needed for development work, e.g. documentation, testing, linting, etc.
+# google-auth - needed for API authentication using Google's Firebase Auth.
+# iex - needed to acquire data from IEX.
+# ipfs - needed to engage with an IPFS network for dataset archival.
+# mysql - needed to engage with a MySQL metadata database.
+
+autopep8==1.5.4:                dev
+commonmark==0.9.1:              dev
+coverage==5.3.1:                dev
+m2r==0.2.1:                     dev
+pip-tools==5.4.0:               dev
+pylint==2.6.0:                  dev
+python-docs-theme==2020.12:     dev
+recommonmark==0.7.1:            dev
+Sphinx==3.4.0:                  dev
+nltk==3.5:                      iex
+mysqlclient==2.0.1:             mysql
+ipfshttpclient==0.7.0a1:        ipfs
+firebase-admin==4.5.1:          google-auth
+google-cloud-firestore==2.0.2:  google-auth
+boto3==1.16.46                  aws
