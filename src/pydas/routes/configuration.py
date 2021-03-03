@@ -25,11 +25,9 @@ configuration_bp = Blueprint('configuration',
 @inject
 def get_configuration(
         metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(Configuration)
-    configurations = query.all()
-
-    return jsonify([json(configuration) for configuration in configurations])
+    with metadata_context.get_session() as session:
+        configurations = session.query(Configuration).all()
+        return jsonify([json(configuration) for configuration in configurations])
 
 
 @configuration_bp.route('/<configuration_name>',
@@ -44,26 +42,26 @@ def configuration_index(configuration_name: str,
     """
     Provides a read-write endpoint for working with a single configuration option.
     """
-    session = metadata_context.get_session()
-    query = session.query(Configuration).filter(
-        Configuration.name == configuration_name)
     try:
-        configuration = query.one()
-        if request.method == constants.HTTP_GET:
+        with metadata_context.get_session() as session:
+            configuration = session.query(Configuration).filter(
+                Configuration.name == configuration_name).one()
+
+            if request.method == constants.HTTP_GET:
+                return jsonify(json(configuration))
+
+            # Patch logic
+            request_configuration = request.get_json()
+            if request_configuration['name'] != configuration.name:
+                return make_response('Error: Request body does not match the configuration referenced',
+                                     400)
+
+            configuration.type = request_configuration['type']
+            configuration.value_text = request_configuration['value_text']
+            configuration.value_number = request_configuration['value_number']
+            session.add(configuration)
+
             return jsonify(json(configuration))
-
-        # Patch logic
-        request_configuration = request.get_json()
-        if request_configuration['name'] != configuration.name:
-            return make_response('Error: Request body does not match the configuration referenced',
-                                 400)
-
-        configuration.type = request_configuration['type']
-        configuration.value_text = request_configuration['value_text']
-        configuration.value_number = request_configuration['value_number']
-        session.add(configuration)
-        session.commit()
-        return jsonify(json(configuration))
     except NoResultFound:
         response = make_response(
             'Cannot find configuration requested', 404)

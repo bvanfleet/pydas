@@ -40,7 +40,13 @@ class Configuration(Base):
         Returns the value set on the configuration. Depending on the configuration.type,
         the value returned will come from either the `value_number` or `value_text` attribute.
         """
-        return self.value_number if self.type in self._supported_number_types else self.value_text
+        if self.type in self._supported_number_types:
+            return self.value_number
+
+        if self.type == 'bool':
+            return self.get_boolean_value()
+
+        return self.value_text
 
     @value.setter
     def value(self, new_value):
@@ -63,9 +69,13 @@ class Configuration(Base):
 
     def get_boolean_value(self):
         """Returns the boolean value from the configuration object's value_text"""
-        if self.value in ['True', 'true']:
-            return True
-        return False
+        if isinstance(self.value_text, str):
+            return self.value_text.lower() == 'true'
+
+        if isinstance(self.value_text, bool):
+            return self.value_text
+
+        raise TypeError('Invalid value set for configuration')
 
     def __json__(self):
         """Returns a jsonify-able representation of the configuration object."""

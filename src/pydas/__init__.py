@@ -76,4 +76,4 @@ def create_app(config_filename: str = 'pydas.yaml'):
     return app
 
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"

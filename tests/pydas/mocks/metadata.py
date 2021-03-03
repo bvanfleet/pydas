@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from pydas_metadata.contexts import BaseContext
 
 
@@ -12,8 +14,9 @@ class MockContext(BaseContext):
     def can_handle(cls, context_type):
         return context_type == "mock"
 
+    @contextmanager
     def get_session(self):
-        return MockSession()
+        yield MockSession()
 
     @classmethod
     def setup(cls, model: object, **query_config):

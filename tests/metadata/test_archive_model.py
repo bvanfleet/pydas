@@ -46,13 +46,14 @@ class TestArchive(unittest.TestCase):
         expected_companies = ['aapl']
         expected_company_count = 1
 
-        # act
-        companies = self.archive.companies(self.context.get_session())
+        with self.context.get_session() as session:
+            # act
+            companies = self.archive.companies(session)
 
-        # assert
-        self.assertEqual(expected_company_count, len(companies))
-        for company in companies:
-            self.assertIn(company.symbol, expected_companies)
+            # assert
+            self.assertEqual(expected_company_count, len(companies))
+            for company in companies:
+                self.assertIn(company.symbol, expected_companies)
 
     def test_from_metadata(self):
         # arrange
@@ -77,7 +78,6 @@ class TestArchive(unittest.TestCase):
         self.aapl = Company(name='Apple', symbol='aapl')
         self.msft = Company(name='Microsoft', symbol='msft')
 
-        session = self.context.get_session()
-        session.add(self.aapl)
-        session.add(self.msft)
-        session.commit()
+        with self.context.get_session() as session:
+            session.add(self.aapl)
+            session.add(self.msft)

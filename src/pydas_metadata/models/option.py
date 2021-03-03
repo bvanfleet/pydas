@@ -51,6 +51,9 @@ class Option(Base):
         if self.option_type in self._supported_number_types:
             return self.value_number
 
+        if self.option_type == 'bool':
+            return self.get_boolean_value()
+
         return self.value_text
 
     @value.setter
@@ -61,6 +64,16 @@ class Option(Base):
         else:
             self.value_text = new_value
             self.value_number = None
+
+    def get_boolean_value(self):
+        """Returns the boolean value from the option's value_text"""
+        if isinstance(self.value_text, str):
+            return self.value_text.lower() == 'true'
+
+        if isinstance(self.value_text, bool):
+            return self.value_text
+
+        raise TypeError('Invalid value set for configuration')
 
     def __json__(self):
         """Returns a jsonify-able representation of the feature object."""

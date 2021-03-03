@@ -25,11 +25,9 @@ statistics_bp = Blueprint('statistics',
                request)
 @inject
 def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(Statistics)
-    statistics = query.all()
-
-    return jsonify([json(entry) for entry in statistics])
+    with metadata_context.get_session() as session:
+        statistics = session.query(Statistics).all()
+        return jsonify([json(entry) for entry in statistics])
 
 
 @statistics_bp.route('/company/<company_symbol>')
@@ -38,26 +36,26 @@ def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_f
                request)
 def company_index(company_symbol: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(
-        Statistics.company_symbol,
-        func.sum(Statistics.row_count).label("row_count")
-    ).filter(
-        Statistics.company_symbol == company_symbol
-    ).group_by(
-        Statistics.company_symbol)
+    with metadata_context.get_session() as session:
+        query = session.query(
+            Statistics.company_symbol,
+            func.sum(Statistics.row_count).label("row_count")
+        ).filter(
+            Statistics.company_symbol == company_symbol
+        ).group_by(
+            Statistics.company_symbol)
 
-    try:
-        statistics = query.one()
-    except NoResultFound:
-        response = make_response(
-            'Cannot find company requested', 404)
-        return response
+        try:
+            statistics = query.one()
+        except NoResultFound:
+            response = make_response(
+                'Cannot find company requested', 404)
+            return response
 
-    return jsonify({
-        "company_symbol": statistics.company_symbol,
-        "total_row_count": int(statistics.row_count)
-    })
+        return jsonify({
+            "company_symbol": statistics.company_symbol,
+            "total_row_count": int(statistics.row_count)
+        })
 
 
 @statistics_bp.route('/company/<company_symbol>/features')
@@ -67,23 +65,23 @@ def company_index(company_symbol: str,
 @inject
 def feature_index(company_symbol: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(
-        Statistics.company_symbol,
-        Statistics.feature_name,
-        func.sum(Statistics.row_count).label("row_count")
-    ).filter(
-        Statistics.company_symbol == company_symbol
-    ).group_by(
-        Statistics.company_symbol,
-        Statistics.feature_name)
-    statistics = query.all()
+    with metadata_context.get_session() as session:
+        query = session.query(
+            Statistics.company_symbol,
+            Statistics.feature_name,
+            func.sum(Statistics.row_count).label("row_count")
+        ).filter(
+            Statistics.company_symbol == company_symbol
+        ).group_by(
+            Statistics.company_symbol,
+            Statistics.feature_name)
+        statistics = query.all()
 
-    return jsonify([{
-        "company_symbol": entry.company_symbol,
-        "feature_name": entry.feature_name,
-        "total_row_count": int(entry.row_count)
-    } for entry in statistics])
+        return jsonify([{
+            "company_symbol": entry.company_symbol,
+            "feature_name": entry.feature_name,
+            "total_row_count": int(entry.row_count)
+        } for entry in statistics])
 
 
 @statistics_bp.route('/company/<company_symbol>/features/<feature_name>')
@@ -94,27 +92,26 @@ def feature_index(company_symbol: str,
 def feature_stats(company_symbol: str,
                   feature_name: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
-    session = metadata_context.get_session()
-    query = session.query(
-        Statistics.company_symbol,
-        Statistics.feature_name,
-        func.sum(Statistics.row_count).label("row_count")
-    ).filter(
-        Statistics.company_symbol == company_symbol,
-        Statistics.feature_name == feature_name
-    ).group_by(
-        Statistics.company_symbol,
-        Statistics.feature_name)
-
     try:
-        statistics = query.one()
+        with metadata_context.get_session() as session:
+            query = session.query(
+                Statistics.company_symbol,
+                Statistics.feature_name,
+                func.sum(Statistics.row_count).label("row_count")
+            ).filter(
+                Statistics.company_symbol == company_symbol,
+                Statistics.feature_name == feature_name
+            ).group_by(
+                Statistics.company_symbol,
+                Statistics.feature_name)
+
+            statistics = query.one()
+            return jsonify({
+                "company_symbol": statistics.company_symbol,
+                "feature_name": statistics.feature_name,
+                "total_row_count": int(statistics.row_count)
+            })
     except NoResultFound:
         response = make_response(
             'Cannot find feature requested', 404)
         return response
-
-    return jsonify({
-        "company_symbol": statistics.company_symbol,
-        "feature_name": statistics.feature_name,
-        "total_row_count": int(statistics.row_count)
-    })
