@@ -69,7 +69,13 @@ class Configuration(Base):
 
     def get_boolean_value(self):
         """Returns the boolean value from the configuration object's value_text"""
-        return self.value_text.lower() == 'true'
+        if isinstance(self.value_text, str):
+            return self.value_text.lower() == 'true'
+
+        if isinstance(self.value_text, bool):
+            return self.value_text
+
+        raise TypeError('Invalid value set for configuration')
 
     def __json__(self):
         """Returns a jsonify-able representation of the configuration object."""

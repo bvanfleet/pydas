@@ -53,8 +53,7 @@ class TestConfigurationModel(unittest.TestCase):
     def test_returns_string_for_nonnumeric_types(self):
         test_cases = [
             ('str', 'abc'),
-            ('bytes', 'some bytes'),
-            ('bool', True)
+            ('bytes', 'some bytes')
         ]
 
         for case in test_cases:
@@ -68,6 +67,29 @@ class TestConfigurationModel(unittest.TestCase):
                 # assert
                 self.assertEqual(case[1], config.value)
                 self.assertIsNotNone(config.value_text)
+
+    def test_returns_bool_for_bool_types(self):
+        test_cases = {
+            "true": True,
+            "TRUE": True,
+            True: True,
+            "false": False,
+            False: False
+        }
+
+        for value, expected in test_cases.items():
+            with self.subTest(value=value, expected=expected):
+                # arrange
+                config = Configuration(name='test',
+                                       type='bool',
+                                       value_text=value)
+
+                # act
+                result = config.value
+
+                # assert
+                self.assertIsInstance(result, bool)
+                self.assertEqual(expected, result)
 
     def test_json(self):
         # arrange
