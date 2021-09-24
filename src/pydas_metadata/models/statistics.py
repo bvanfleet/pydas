@@ -3,12 +3,12 @@ from datetime import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 from pydas_metadata.models.company import Company
 from pydas_metadata.models.feature import Feature
 
 
-class Statistics(Base):
+class Statistics(Base, Jsonifiable):
     """
     Row count data associated with a particular :class:`metadata.models.Company`
     and :class:`metadata.models.Feature`.

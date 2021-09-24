@@ -1,11 +1,35 @@
 """Classes for transforming acquired data into a desired form prior to output."""
 
-from typing import List
+from abc import ABCMeta, abstractmethod
+from typing import Any, List
 
-from .base import BaseFormatter
 from .compression import CompressionFormatter
 from .file import FileFormatter
 from .json import JsonFormatter
+
+
+class Formatter(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def can_handle(cls, output_format: str) -> bool:
+        """
+        Returns a value indicating whether this formatter supports the requested type.
+
+        Parameters
+        ----------
+        output_format: str
+            Name of the formatter being requested.
+
+        Returns
+        -------
+        bool:
+            Flag indicating whether the formatter supports the requested output format.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def transform(self, data: dict, **format_options) -> Any:
+        raise NotImplementedError()
 
 
 class FormatterFactory:
@@ -24,12 +48,12 @@ class FormatterFactory:
         Collection of built-in output formatters.
     """
 
-    formatters: List[BaseFormatter] = [CompressionFormatter,
-                                       FileFormatter,
-                                       JsonFormatter]
+    formatters: List[Formatter] = [CompressionFormatter,
+                                   FileFormatter,
+                                   JsonFormatter]
 
     @classmethod
-    def register_formatter(cls, formatter: BaseFormatter):
+    def register_formatter(cls, formatter: Formatter):
         """
         Registers an output formatter with the factory.
 
@@ -49,7 +73,7 @@ class FormatterFactory:
         cls.formatters.append(formatter)
 
     @classmethod
-    def get_formatter(cls, output_format) -> BaseFormatter:
+    def get_formatter(cls, output_format) -> Formatter:
         """
         Retrieves and returns an output formatter instance.
 

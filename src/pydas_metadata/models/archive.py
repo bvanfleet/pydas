@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from pydas_metadata import models
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 
 
-class Archive(Base):
+class Archive(Base, Jsonifiable):
     '''
     Contains metadata for storing datasets within a file archival system.
 

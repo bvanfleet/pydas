@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Float, Integer, String
 
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 
 
-class Configuration(Base):
+class Configuration(Base, Jsonifiable):
     """Model used to set system-wide runtime configuration.
 
     Attributes

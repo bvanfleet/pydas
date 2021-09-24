@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Boolean, Integer, String
 
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 
 
-class FeatureToggle(Base):
+class FeatureToggle(Base, Jsonifiable):
     """
     An optional runtime configuration object for enabling specific
     features and functions within the sDAS platform.
@@ -32,3 +32,12 @@ class FeatureToggle(Base):
     description = Column('ToggleDSC', String(255), nullable=False)
     is_enabled = Column('ToggleIsEnabledFLG', Boolean,
                         default=False, nullable=False)
+
+    def __json__(self) -> dict:
+        """Returns a jsonify-able representation of the feature object."""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'is_enabled': self.is_enabled
+        }

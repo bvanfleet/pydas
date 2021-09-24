@@ -7,7 +7,7 @@ import shutil
 from typing import Any
 from zipfile import ZipFile
 
-from pydas.formatters.base import BaseFormatter
+from pydas.formatters import Formatter
 
 
 class CompressionType(Enum):
@@ -62,7 +62,7 @@ class CompressionType(Enum):
         raise KeyError('Unsupported compression type given!')
 
 
-class CompressionFormatter(BaseFormatter):
+class CompressionFormatter(Formatter):
     @classmethod
     def can_handle(cls, output_format: str) -> bool:
         try:

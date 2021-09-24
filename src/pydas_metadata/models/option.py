@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Float, ForeignKey, String
 
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 
 
-class Option(Base):
+class Option(Base, Jsonifiable):
     """Feature option for providing additional runtime configuration.
 
     Attributes

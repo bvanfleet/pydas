@@ -9,10 +9,10 @@ from botocore.config import Config
 from pydas_metadata.contexts.base import BaseContext
 from pydas_metadata.models import Company, Configuration, Feature
 
-from pydas.clients.base import BaseDataClient
+from pydas.clients import DataClient
 
 
-class AwsS3Client(BaseDataClient):
+class AwsS3Client(DataClient):
     def __init__(self, **kwargs):
         if 'context' not in kwargs:
             raise KeyError('A valid data context must be provided!')

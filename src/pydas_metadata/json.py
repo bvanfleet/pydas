@@ -1,7 +1,9 @@
 import json as j
 
+from pydas_metadata.models.base import Jsonifiable
 
-def json(model, as_str=False):
+
+def json(model: Jsonifiable, as_str=False):
     '''
     Returns as JSON representation of the object.
 

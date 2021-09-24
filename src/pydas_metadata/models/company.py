@@ -3,12 +3,12 @@ from typing import List
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 from pydas_metadata.models.company_feature import CompanyFeatureMap
 from pydas_metadata.models.feature import Feature
 
 
-class Company(Base):
+class Company(Base, Jsonifiable):
     """
     Base entity that data features are mapped to. This object groups features for dataset
     generation and provides additional metadata for user experience.

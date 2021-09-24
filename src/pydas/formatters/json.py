@@ -3,10 +3,10 @@ import logging
 from typing import Any, Callable
 
 from pydas.constants import SdasConstants, UtilityConstants
-from pydas.formatters.base import BaseFormatter
+from pydas.formatters import Formatter
 
 
-class JsonFormatter(BaseFormatter):
+class JsonFormatter(Formatter):
     @classmethod
     def can_handle(cls, output_format: str) -> bool:
         return output_format == 'json'

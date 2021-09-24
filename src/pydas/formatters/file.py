@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from pydas.formatters.base import BaseFormatter
+from pydas.formatters import Formatter
 
 
-class FileFormatter(BaseFormatter):
+class FileFormatter(Formatter):
     """Data formatter for converting an in-memory data object into a delimited file"""
 
     @classmethod

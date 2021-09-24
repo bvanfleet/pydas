@@ -3,12 +3,12 @@ import importlib
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from pydas_metadata.models.base import Base
+from pydas_metadata.models.base import Base, Jsonifiable
 from pydas_metadata.models.handler import Handler
 from pydas_metadata import constants as const
 
 
-class Feature(Base):
+class Feature(Base, Jsonifiable):
     '''
     Data point metadata for tracking what feature to acquire, how to acquire it, and
     information for user friendliness.
@@ -56,9 +56,7 @@ class Feature(Base):
         Callable:
             Data acquisition function associated with the feature.
         """
-        # TODO: Determine if there's a way we can remove this coupling by making
-        # the handler_path configurable
-        handlers = importlib.import_module('pydas.transformers')
+        handlers = importlib.import_module(self.handler_metadata.path)
         return getattr(handlers, self.handler_metadata.name)
 
     def get_value(self, data: dict) -> tuple:

@@ -1,4 +1,6 @@
 import configparser
+import os
+import pathlib
 
 from pydas_config.parsers.base import BaseParser
 
@@ -23,3 +25,25 @@ class IniParser (BaseParser):
                              for key, value in parser.items(section)}
                    for section in parser.sections()
                    if section != 'pydas'}}
+
+    @classmethod
+    def write(cls, filename: str, data: dict, section_name="pydas", replace=False):
+        if data is None:
+            raise ValueError("Data cannot be NoneType!")
+
+        if filename is None:
+            raise ValueError("A valid filename must be provided.")
+
+        path = pathlib.Path(filename)
+        if path.exists() and replace:
+            os.remove(filename)
+
+        with open(filename, 'a') as ini:
+            ini.write(f"[{section_name}]\n")
+
+        for key, value in data.items():
+            if isinstance(value, dict):
+                cls.write(filename, value, section_name=key)
+            else:
+                with open(filename, 'a') as ini:
+                    ini.write(f"{key}={value}\n")
