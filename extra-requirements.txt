@@ -21,7 +21,7 @@ python-docs-theme==2020.12      : dev
 recommonmark==0.7.1             : dev
 Sphinx==3.4.0                   : dev
 nltk==3.5                       : iex
-mysqlclient==2.0.3              : mysql
+# mysqlclient==2.0.3              : mysql
 mariadb==1.0.8                  : mariadb
 ipfshttpclient==0.7.0a1         : ipfs
 firebase-admin==4.5.1           : google-auth
