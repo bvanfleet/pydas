@@ -39,8 +39,9 @@ class FileFormatter(BaseFormatter):
                     format_options['row_delimiter']))
 
             for row in data['values']:
-                file.write(format_options['field_delimiter'].join(
-                    str(field) for field in row))
+                # TODO: Replace the default text qualifiers with configurable values.
+                row = format_options['field_delimiter'].join(f'"{field}"' for field in row)
+                file.write(row)
                 file.write(self.__get_control_character(
                     format_options['row_delimiter']))
 

@@ -14,7 +14,7 @@ from pydas_metadata.contexts import BaseContext
 from pydas_metadata.models import Entity, Option
 
 from pydas import constants
-from pydas.clients.iex import IexClient
+from pydas.clients import DataClientFactory
 from pydas.constants import FeatureToggles
 from pydas.containers import ApplicationContainer
 from pydas.formatters import BaseFormatter, FormatterFactory
@@ -66,8 +66,14 @@ def acquire(company_symbol,
 
     results = dict()
     api_key = metadata_context.get_configuration('apiKey')
-    logging.debug("Creating IEX client with API Key: %s", api_key)
-    client = IexClient(api_key)
+    source_type = ""
+
+    with metadata_context.get_session() as session:
+        entity = session.query(Entity).filter(Entity.identifier == company_symbol).one()
+        source_type = entity.source
+
+    logging.debug("Creating %s client with API Key: %s", source_type, api_key)
+    client = DataClientFactory.get_client(source_type, apiKey=api_key)
 
     try:
         if should_handle_events:
@@ -89,7 +95,7 @@ def acquire(company_symbol,
                         feature_name=feature.name,
                         start_date=datetime.now().isoformat())
 
-                feature_option = session.query(Option).filter(Option.company_symbol == company_symbol,
+                feature_option = session.query(Option).filter(Option.entity_id == company_symbol,
                                                               Option.feature_name == feature.name).all()
                 option = [json(option) for option in feature_option]
                 logging.info(
@@ -110,6 +116,8 @@ def acquire(company_symbol,
                     results[feature.name] = feature.get_values(data)
                 elif isinstance(data, dict):
                     results[feature.name] = [feature.get_value(data)]
+                else:
+                    results[feature.name] = []
                 logging.info(
                     "Acquired %d rows", len(results[feature.name]))
 

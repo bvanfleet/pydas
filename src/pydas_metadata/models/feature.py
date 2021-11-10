@@ -1,3 +1,4 @@
+import dataclasses
 import importlib
 
 from sqlalchemy import Column, ForeignKey, Integer, String
@@ -74,8 +75,12 @@ class Feature(Base):
         tuple:
             Data point extracted from the given object.
         """
-        if self.name in data:
-            return (data[self.name], data[const.DATE_PROPERTY])
+        value = data
+        if dataclasses.is_dataclass(data):
+            value = dataclasses.asdict(data)
+        
+        if self.name in value:
+            return (value[self.name], value[const.DATE_PROPERTY])
 
         return const.STR_EMPTY
 

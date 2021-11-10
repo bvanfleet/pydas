@@ -397,7 +397,7 @@ paths:
           description: "User is not authorized to access this data"
         404:
           description: "Entity or feature not found"
-  /features:
+  /features/:
     get:
       tags:
         - "features"
@@ -439,7 +439,7 @@ paths:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
-  /features/{feature_name}:
+  /features/{feature_name}/:
     get:
       tags:
         - "features"

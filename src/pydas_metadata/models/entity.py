@@ -33,6 +33,7 @@ class Entity(Base):
     identifier: str = Column('Identifier', String(10), primary_key=True)
     name: str = Column('Name', String)
     category: str = Column('Category', String)
+    source: str = Column('SourceNM', String)
 
     features: List[Feature] = relationship('Feature', secondary=EntityFeatureMap)
 
@@ -55,5 +56,6 @@ class Entity(Base):
             "identifier": self.identifier,
             "name": self.name,
             "category": self.category,
+            "source": self.source,
             "features": {"$ref": f'/api/v1/companies/{self.identifier}/features'}
         }
