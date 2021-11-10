@@ -8,39 +8,39 @@ from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
-from pydas_metadata.models import Company, Feature, Option
+from pydas_metadata.models import Entity, Feature, Option
 
 from pydas import constants
 from pydas.containers import ApplicationContainer
 
-company_bp = Blueprint('companies',
-                       'pydas.routes.companies',
-                       url_prefix='/api/v1/companies')
+entity_bp = Blueprint('entities',
+                       'pydas.routes.entities',
+                       url_prefix='/api/v1/entities')
 
 
-@company_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
+@entity_bp.route(constants.BASE_PATH, methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
                 constants.HTTP_POST: scopes.COMPANIES_WRITE},
                current_app,
                request)
 @inject
-def companies_index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
+def entities_index(metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     if request.method == constants.HTTP_GET:
         with metadata_context.get_session() as session:
-            companies = session.query(Company).all()
-            return jsonify([json(company) for company in companies])
+            entities = session.query(Entity).all()
+            return jsonify([json(entity) for entity in entities])
 
-    request_company = request.get_json()
+    request_entity = request.get_json()
     with metadata_context.get_session() as session:
-        new_company = Company(symbol=request_company['symbol'],
-                              name=request_company['name'],
-                              market=request_company['market'])
-        session.add(new_company)
+        new_entity = Entity(identifier=request_entity['identifier'],
+                             name=request_entity['name'],
+                             category=request_entity['category'])
+        session.add(new_entity)
 
-    return jsonify(json(new_company)), 201
+    return jsonify(json(new_entity)), 201
 
 
-@company_bp.route('/<company_symbol>',
+@entity_bp.route('/<entity_identifier>',
                   methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
                 constants.HTTP_PATCH: scopes.COMPANIES_WRITE,
@@ -48,87 +48,87 @@ def companies_index(metadata_context: BaseContext = Provide[ApplicationContainer
                current_app,
                request)
 @inject
-def get_company(company_symbol: str,
+def get_entity(entity_identifier: str,
                 metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     try:
         with metadata_context.get_session() as session:
-            company = session.query(Company).filter(
-                Company.symbol == company_symbol).one()
+            entity = session.query(Entity).filter(
+                Entity.identifier == entity_identifier).one()
             if request.method == constants.HTTP_GET:
-                return jsonify(json(company))
+                return jsonify(json(entity))
 
             if request.method == constants.HTTP_DELETE:
-                session.delete(company)
+                session.delete(entity)
                 return '', 204
 
-            request_company = request.get_json()
-            if request_company['symbol'] != company.symbol:
+            request_entity = request.get_json()
+            if request_entity['identifier'] != entity.identifier:
                 return make_response(
-                    'Error: Request body does not match the company referenced', 400)
+                    'Error: Request body does not match the entity referenced', 400)
 
-            company.symbol = request_company['symbol']
-            company.name = request_company['name']
-            company.market = request_company['market']
-            session.add(company)
-            return jsonify(json(company))
+            entity.identifier = request_entity['identifier']
+            entity.name = request_entity['name']
+            entity.category = request_entity['category']
+            session.add(entity)
+            return jsonify(json(entity))
     except NoResultFound:
         response = make_response(
-            'Cannot find company requested', 404)
+            'Cannot find the entity requested', 404)
         return response
 
 
-@company_bp.route('/<company_symbol>/features', methods=[constants.HTTP_GET, constants.HTTP_POST])
+@entity_bp.route('/<entity_identifier>/features', methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
                 constants.HTTP_POST: scopes.COMPANIES_WRITE},
                current_app,
                request)
 @inject
-def company_features_index(company_symbol: str,
+def entity_features_index(entity_identifier: str,
                            metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     try:
         with metadata_context.get_session() as session:
-            company = session.query(Company).filter(
-                Company.symbol == company_symbol).one()
+            entity = session.query(Entity).filter(
+                Entity.identifier == entity_identifier).one()
 
             if request.method == constants.HTTP_GET:
-                return jsonify([json(feature) for feature in company.features])
+                return jsonify([json(feature) for feature in entity.features])
 
             request_map = request.get_json()
             feature = session.query(Feature).filter(
                 Feature.name == request_map['name']).one()
-            company.features.append(feature)
-            session.add(company)
+            entity.features.append(feature)
+            session.add(entity)
 
-            return jsonify([json(feature) for feature in company.features]), 201
+            return jsonify([json(feature) for feature in entity.features]), 201
     except NoResultFound:
         response = make_response(
-            'Cannot find company or feature requested', 404)
+            'Cannot find the entity or feature requested', 404)
         return response
 
 
-@company_bp.route('/<company_symbol>/features/<feature_name>',
+@entity_bp.route('/<entity_identifier>/features/<feature_name>',
                   methods=[constants.HTTP_GET, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
                 constants.HTTP_DELETE: scopes.COMPANIES_DELETE},
                current_app,
                request)
 @inject
-def company_feature_index(company_symbol: str,
+def entity_feature_index(entity_identifier: str,
                           feature_name: str,
                           metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     try:
         with metadata_context.get_session() as session:
-            company = session.query(Company).filter(
-                Company.symbol == company_symbol).one()
+            entity = session.query(Entity).filter(
+                Entity.identifier == entity_identifier).one()
 
             if request.method == constants.HTTP_DELETE:
                 feature = session.query(Feature).filter(
                     Feature.name == feature_name).one()
-                company.features.remove(feature)
-                session.add(company)
+                entity.features.remove(feature)
+                session.add(entity)
                 return '', 204
 
-            for feature in company.features:
+            for feature in entity.features:
                 if feature.name == feature_name:
                     return jsonify(json(feature))
 
@@ -136,24 +136,24 @@ def company_feature_index(company_symbol: str,
             return response
     except NoResultFound:
         response = make_response(
-            'Cannot find company or feature requested', 404)
+            'Cannot find the entity or feature requested', 404)
         return response
 
 
-@company_bp.route('/<company_symbol>/features/<feature_name>/options',
+@entity_bp.route('/<entity_identifier>/features/<feature_name>/options',
                   methods=[constants.HTTP_GET, constants.HTTP_POST])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
                 constants.HTTP_POST: scopes.COMPANIES_WRITE},
                current_app,
                request)
 @inject
-def options_index(company_symbol: str,
+def options_index(entity_identifier: str,
                   feature_name: str,
                   metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     if request.method == constants.HTTP_GET:
         with metadata_context.get_session() as session:
             query = session.query(Option).filter(
-                Option.company_symbol == company_symbol,
+                Option.entity_identifier == entity_identifier,
                 Option.feature_name == feature_name)
             options = query.all()
 
@@ -166,7 +166,7 @@ def options_index(company_symbol: str,
                     else request_option['value'])
     with metadata_context.get_session() as session:
         new_option = Option(name=request_option['name'],
-                            company_symbol=request_option['company_symbol'],
+                            entity_identifier=request_option['entity_identifier'],
                             feature_name=request_option['feature_name'],
                             option_type=request_option['option_type'],
                             value_text=option_value,
@@ -176,7 +176,7 @@ def options_index(company_symbol: str,
     return jsonify(json(new_option)), 201
 
 
-@company_bp.route('/<company_symbol>/features/<feature_name>/options/<option_name>',
+@entity_bp.route('/<entity_identifier>/features/<feature_name>/options/<option_name>',
                   methods=[constants.HTTP_GET, constants.HTTP_PATCH, constants.HTTP_DELETE])
 @verify_scopes({constants.HTTP_GET: scopes.COMPANIES_READ,
                 constants.HTTP_PATCH: scopes.COMPANIES_WRITE,
@@ -184,14 +184,14 @@ def options_index(company_symbol: str,
                current_app,
                request)
 @inject
-def option_index(company_symbol: str,
+def option_index(entity_identifier: str,
                  feature_name: str,
                  option_name: str,
                  metadata_context: BaseContext = Provide[ApplicationContainer.context_factory]):
     try:
         with metadata_context.get_session() as session:
             query = session.query(Option).filter(
-                Option.company_symbol == company_symbol,
+                Option.entity_identifier == entity_identifier,
                 Option.feature_name == feature_name,
                 Option.name == option_name)
             option = query.one()
@@ -210,7 +210,7 @@ def option_index(company_symbol: str,
             option_value = (request_option['value_text']
                             if 'value_text' in request_option
                             else request_option['value'])
-            company_symbol = request_option['company_symbol']
+            entity_identifier = request_option['entity_identifier']
             feature_name = request_option['feature_name']
             option.option_type = request_option['option_type']
             option.value_text = option_value

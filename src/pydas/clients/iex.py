@@ -30,7 +30,7 @@ class IexClient(BaseDataClient):
     def can_handle(cls, source: str) -> bool:
         return source.lower() == 'iex'
 
-    def get_feature_data(self, feature, company, options):
+    def get_feature_data(self, feature, entity, options):
         """Retrieves data from IEX Cloud REST API using the feature handler
 
         Parameters
@@ -47,6 +47,6 @@ class IexClient(BaseDataClient):
         """
         url = (self.base_uri +
                self.version +
-               feature.uri.format(symbol=company.symbol))
+               feature.uri.format(symbol=entity.identifier))
         logging.debug('Requesting data at %s', url)
         return feature.handler(url, options, self.key)

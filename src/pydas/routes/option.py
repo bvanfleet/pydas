@@ -32,7 +32,7 @@ def index(metadata_context: BaseContext = Provide[ApplicationContainer.context_f
     with metadata_context.get_session() as session:
         request_option = request.get_json()
         new_option = Option(name=request_option['name'],
-                            company_symbol=request_option['company_symbol'],
+                            entity_id=request_option['entity_id'],
                             feature_name=request_option['feature_name'],
                             option_type=request_option['option_type'],
                             value_text=request_option['value_text'],

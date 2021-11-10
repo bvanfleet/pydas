@@ -2,7 +2,7 @@ from datetime import datetime
 import unittest
 
 from pydas_metadata.contexts import MemoryContext
-from pydas_metadata.models import Archive, Base, Company
+from pydas_metadata.models import Archive, Base, Entity
 
 
 class TestArchive(unittest.TestCase):
@@ -53,7 +53,7 @@ class TestArchive(unittest.TestCase):
             # assert
             self.assertEqual(expected_company_count, len(companies))
             for company in companies:
-                self.assertIn(company.symbol, expected_companies)
+                self.assertIn(company.identifier, expected_companies)
 
     def test_from_metadata(self):
         # arrange
@@ -75,8 +75,8 @@ class TestArchive(unittest.TestCase):
                          archive.date_created.date().isoformat())
 
     def _preseed_companies(self):
-        self.aapl = Company(name='Apple', symbol='aapl')
-        self.msft = Company(name='Microsoft', symbol='msft')
+        self.aapl = Entity(name='Apple', identifier='aapl')
+        self.msft = Entity(name='Microsoft', identifier='msft')
 
         with self.context.get_session() as session:
             session.add(self.aapl)

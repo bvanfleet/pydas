@@ -33,12 +33,12 @@ setup(
     install_requires=[
         "alembic==1.4.3",
         "blinker==1.4",
-        "dependency-injector[yaml]==4.27.0",
+        "dependency-injector[yaml]==4.36.2",
         "Flask==1.1.2",
         "Flask-Cors==3.0.8",
         "flask-swagger-ui==3.25.0",
         "requests==2.24.0",
-        "SQLAlchemy==1.3.18"
+        "SQLAlchemy==1.4.26"
     ],
     extras_require=get_extra_requires('extra-requirements.txt')
 )

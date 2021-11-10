@@ -34,7 +34,7 @@ class ContextFactory:
         """
         for context in cls.supported_contexts:
             if context.can_handle(context_type):
-                return context(**context_config)
+                return context(dialect=context_type, **context_config)
 
         raise ValueError(
             f"Unsupported context dialect detected: {context_type}")

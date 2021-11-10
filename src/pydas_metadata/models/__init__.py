@@ -2,7 +2,7 @@
 
 from .archive import Archive
 from .base import Base
-from .company import Company
+from .entity import Entity
 from .configuration import Configuration
 from .event_handler import EventHandler
 from .feature import Feature

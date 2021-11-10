@@ -2,6 +2,7 @@ from logging.config import dictConfig
 
 from dependency_injector import containers, providers
 
+from pydas import clients
 from pydas_metadata import contexts
 
 

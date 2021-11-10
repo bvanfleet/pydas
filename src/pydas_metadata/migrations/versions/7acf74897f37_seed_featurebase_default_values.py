@@ -36,19 +36,19 @@ feature_values = [
     {'Name': 'macd', 'URI': '/stock/{symbol:}/indicator/macd',
      'HandlerID': 3, 'Description': 'Moving Average Convergence Divergence, an indicator that measures trend momentum using two moving averages.'},
     {'Name': 'rsi', 'URI': '/stock/{symbol:}/indicator/rsi',
-     'HandlerID': 3, 'Description': sa.sql.null()},
+     'HandlerID': 3, 'Description': None},
     {'Name': 'cci', 'URI': '/stock/{symbol:}/indicator/cci',
-     'HandlerID': 3, 'Description': sa.sql.null()},
+     'HandlerID': 3, 'Description': None},
     {'Name': 'sma', 'URI': '/stock/{symbol:}/indicator/sma',
-     'HandlerID': 3, 'Description': sa.sql.null()},
+     'HandlerID': 3, 'Description': None},
     {'Name': 'ema', 'URI': '/stock/{symbol:}/indicator/ema',
-     'HandlerID': 3, 'Description': sa.sql.null()},
+     'HandlerID': 3, 'Description': None},
     {'Name': 'adx', 'URI': '/stock/{symbol:}/indicator/adx',
-     'HandlerID': 3, 'Description': sa.sql.null()},
+     'HandlerID': 3, 'Description': None},
     {'Name': 'adxr', 'URI': '/stock/{symbol:}/indicator/adxr',
-     'HandlerID': 3, 'Description': sa.sql.null()},
+     'HandlerID': 3, 'Description': None},
     {'Name': 'stoch', 'URI': '/stock/{symbol:}/indicator/stoch',
-     'HandlerID': 3, 'Description': sa.sql.null()}
+     'HandlerID': 3, 'Description': None}
 ]
 
 # revision identifiers, used by Alembic.

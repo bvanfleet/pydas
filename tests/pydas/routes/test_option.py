@@ -15,7 +15,7 @@ class TestOptionRoute(unittest.TestCase):
         # arrange
         expected_option = Option(name="range",
                                  feature_name="open",
-                                 company_symbol="gme",
+                                 entity_id="gme",
                                  option_type="str",
                                  value_text="3m")
         MockContext.setup(Option, all=[expected_option])
@@ -31,7 +31,7 @@ class TestOptionRoute(unittest.TestCase):
         # arrange
         option_json = dict(name="range",
                            feature_name="open",
-                           company_symbol="gme",
+                           entity_id="gme",
                            option_type="str",
                            value_text="3m",
                            value_number=None)
@@ -47,12 +47,12 @@ class TestOptionRoute(unittest.TestCase):
         # arrange
         expected_option = Option(name="range",
                                  feature_name="open",
-                                 company_symbol="gme",
+                                 entity_id="gme",
                                  option_type="str",
                                  value_text="3m")
         alternate_option = Option(name="range",
                                   feature_name="open",
-                                  company_symbol="gme",
+                                  entity_id="gme",
                                   option_type="str",
                                   value_text="3m")
         MockContext.setup(

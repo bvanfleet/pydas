@@ -10,12 +10,12 @@ tags:
     description: "Communication pipeline to retrieve data at runtime"
   - name: "configuration"
     description: "pyDAS configuration attributes that controls system functionality"
-  - name: "companies"
-    description: "Companies that can have data acquired for"
-  - name: "company features"
-    description: "Company/Feature mapping for controlling what data is acquired"
+  - name: "entities"
+    description: "Entities that can have data acquired for"
+  - name: "entity features"
+    description: "Entity/Feature mapping for controlling what data is acquired"
   - name: "features"
-    description: "Features that controls what data is acquired for a company"
+    description: "Features that controls what data is acquired for a entity"
   - name: "handlers"
     description: "Feature handler extensibility for how the data is acquired"
   - name: "options"
@@ -32,19 +32,19 @@ securityDefinitions:
 security:
   - AuthorizationHeader: []
 paths:
-  /acquire/{company_symbol}:
+  /acquire/{entity_identifier}:
     get:
       tags:
         - "acquire"
-      summary: "Retrieves data for a given company and its features"
+      summary: "Retrieves data for a given entity and its features"
       description: ""
       operationId: "getAcquire"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Company symbol to retrieve stock data for"
+          description: "Entity identifier to retrieve stock data for"
           required: true
           type: string
         - name: "format"
@@ -59,7 +59,7 @@ paths:
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Invalid company_symbol"
+          description: "Invalid entity_identifier"
   /configuration:
     get:
       tags:
@@ -129,28 +129,28 @@ paths:
           description: "User is not authorized to access this data"
         404:
           description: "Configuration attribute not found"
-  /companies:
+  /entities:
     get:
       tags:
-        - "companies"
-      summary: "Retrieves all registered companies"
+        - "entities"
+      summary: "Retrieves all registered entities"
       description: ""
-      operationId: "getCompanies"
+      operationId: "getEntities"
       produces:
         - "application/json"
       responses:
         200:
-          description: "Array of company objects registered in the system"
+          description: "Array of entity objects registered in the system"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
     post:
       tags:
-        - "companies"
-      summary: "Register a new company in the system"
+        - "entities"
+      summary: "Register a new entity in the system"
       description: ""
-      operationId: "addCompany"
+      operationId: "addEntity"
       consumes:
         - "application/json"
       produces:
@@ -158,135 +158,135 @@ paths:
       parameters:
         - in: "body"
           name: "body"
-          description: "Company object that needs to be registered"
+          description: "Entity object that needs to be registered"
           required: true
           schema:
-            $ref: "#/definitions/Company"
+            $ref: "#/definitions/Entity"
       responses:
         201:
-          description: "Newly registered company"
+          description: "Newly registered entity"
         400:
           description: "Invalid input"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
-  /companies/{company_symbol}:
+  /entities/{entity_identifier}:
     get:
       tags:
-        - "companies"
-      summary: "Retrieves a single registered company"
+        - "entities"
+      summary: "Retrieves a single registered entity"
       description: ""
-      operationId: "getCompany"
+      operationId: "getEntity"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to return"
+          description: "Identifier of entity to return"
           required: true
           type: string
       produces:
         - "application/json"
       responses:
         200:
-          description: "Company object registered in the system with a matching symbol"
+          description: "Entity object registered in the system with a matching identifier"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company not found"
+          description: "Entity not found"
     patch:
       tags:
-        - "companies"
-      summary: "Update an existing company registry"
+        - "entities"
+      summary: "Update an existing entity registry"
       description: ""
-      operationId: "updateCompany"
+      operationId: "updateEntity"
       consumes:
         - "application/json"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to update"
+          description: "Identifier of entity to update"
           required: true
           type: string
         - in: "body"
           name: "body"
-          description: "Company object to update in the system"
+          description: "Entity object to update in the system"
           required: true
           schema:
-            $ref: "#/definitions/Company"
+            $ref: "#/definitions/Entity"
       responses:
         200:
-          description: "Updated company object"
+          description: "Updated entity object"
         400:
-          description: "Invalid company object supplied"
+          description: "Invalid entity object supplied"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company not found"
+          description: "Entity not found"
     delete:
       tags:
-        - "companies"
-      summary: "Deletes a company"
+        - "entities"
+      summary: "Deletes a entity"
       description: ""
-      operationId: "deleteCompany"
+      operationId: "deleteEntity"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to delete"
+          description: "Identifier of entity to delete"
           required: true
           type: string
       responses:
         204:
-          description: "Company successfully deleted"
+          description: "Entity successfully deleted"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company not found"
-  /companies/{company_symbol}/features:
+          description: "Entity not found"
+  /entities/{entity_identifier}/features:
     get:
       tags:
-        - "company features"
-      summary: "Retrieves all features mapped to the company"
+        - "entity features"
+      summary: "Retrieves all features mapped to the entity"
       description: ""
-      operationId: "getCompanyFeatures"
+      operationId: "getEntityFeatures"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to retrieve features for"
+          description: "Identifier of entity to retrieve features for"
           required: true
           type: string
       responses:
         200:
-          description: "Array of features mapped to the registered company"
+          description: "Array of features mapped to the registered entity"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company not found"
+          description: "Entity not found"
     post:
       tags:
-        - "company features"
-      summary: "Maps a feature to a registered company in the system"
+        - "entity features"
+      summary: "Maps a feature to a registered entity in the system"
       description: ""
-      operationId: "addCompanyFeature"
+      operationId: "addEntityFeature"
       consumes:
         - "application/json"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to retrieve features for"
+          description: "Identifier of entity to retrieve features for"
           required: true
           type: string
         - in: "body"
@@ -304,17 +304,17 @@ paths:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
-  /companies/{company_symbol}/features/{feature_name}:
+  /entities/{entity_identifier}/features/{feature_name}:
     get:
       tags:
-        - "company features"
+        - "entity features"
       summary: "Retrieves a single registered feature"
       description: ""
-      operationId: "getCompanyFeature"
+      operationId: "getEntityFeature"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to retrieve features for"
+          description: "Identifier of entity to retrieve features for"
           required: true
           type: string
         - name: "feature_name"
@@ -332,21 +332,21 @@ paths:
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company or feature not found"
+          description: "Entity or feature not found"
     patch:
       tags:
-        - "company features"
+        - "entity features"
       summary: "Update an existing feature registry"
       description: ""
-      operationId: "updateCompanyFeature"
+      operationId: "updateEntityFeature"
       consumes:
         - "application/json"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to retrieve features for"
+          description: "Identifier of entity to retrieve features for"
           required: true
           type: string
         - name: "feature_name"
@@ -370,17 +370,17 @@ paths:
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company or feature not found"
+          description: "Entity or feature not found"
     delete:
       tags:
-        - "company features"
+        - "entity features"
       summary: "Deletes a feature"
       description: ""
-      operationId: "deleteCompanyFeature"
+      operationId: "deleteEntityFeature"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Symbol of company to retrieve features for"
+          description: "Identifier of entity to retrieve features for"
           required: true
           type: string
         - name: "feature_name"
@@ -396,7 +396,7 @@ paths:
         403:
           description: "User is not authorized to access this data"
         404:
-          description: "Company or feature not found"
+          description: "Entity or feature not found"
   /features:
     get:
       tags:
@@ -611,65 +611,65 @@ paths:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
-  /statistics/company/{company_symbol}:
+  /statistics/entity/{entity_identifier}:
     get:
       tags:
         - "statistics"
-      summary: "Retrieves system statistics for a given company"
+      summary: "Retrieves system statistics for a given entity"
       description: ""
-      operationId: "getCompanyStatistics"
+      operationId: "getEntityStatistics"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Company symbol to return statistics for"
+          description: "Entity identifier to return statistics for"
           required: true
           type: string
       responses:
         200:
-          description: "Statistics for the given company"
+          description: "Statistics for the given entity"
           schema:
             $ref: "#/definitions/Statistics"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
-  /statistics/company/{company_symbol}/features:
+  /statistics/entity/{entity_identifier}/features:
     get:
       tags:
         - "statistics"
-      summary: "Retrieves system statistics for a given company, broken down by feature"
+      summary: "Retrieves system statistics for a given entity, broken down by feature"
       description: ""
-      operationId: "getCompanyFeaturesStatistics"
+      operationId: "getEntityFeaturesStatistics"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Company symbol to return statistics for"
+          description: "Entity identifier to return statistics for"
           required: true
           type: string
       responses:
         200:
-          description: "Array of feature statistics for the given company"
+          description: "Array of feature statistics for the given entity"
         401:
           description: "Invalid or null Authorization header (apiKey)"
         403:
           description: "User is not authorized to access this data"
-  /statistics/company/{company_symbol}/features/{feature_name}:
+  /statistics/entity/{entity_identifier}/features/{feature_name}:
     get:
       tags:
         - "statistics"
-      summary: "Retrieves system statistics for a given company feature"
+      summary: "Retrieves system statistics for a given entity feature"
       description: ""
-      operationId: "getCompanyFeatureStatistics"
+      operationId: "getEntityFeatureStatistics"
       produces:
         - "application/json"
       parameters:
-        - name: "company_symbol"
+        - name: "entity_identifier"
           in: "path"
-          description: "Company symbol to return statistics for"
+          description: "Entity identifier to return statistics for"
           required: true
           type: string
         - name: "feature_name"
@@ -679,7 +679,7 @@ paths:
           type: string
       responses:
         200:
-          description: "Feature statistics for the given company"
+          description: "Feature statistics for the given entity"
           schema:
             $ref: "#/definitions/Statistics"
         401:
@@ -711,21 +711,21 @@ definitions:
       value_number:
         type: number
         format: float
-  Company:
+  Entity:
     type: object
     description: "Organization to acquire data about"
     required:
-      - "symbol"
+      - "identifier"
       - "name"
-      - "market"
+      - "category"
     properties:
-      symbol:
+      identifier:
         type: string
         example: "GOOGL"
       name:
         type: string
         example: "Alphabet, inc"
-      market:
+      category:
         type: string
         example: "technology"
   Feature:
@@ -742,7 +742,7 @@ definitions:
       uri:
         type: string
         description: "third-party API endpoint to acquire the data from"
-        example: "/stock/{:symbol}/chart"
+        example: "/stock/{:identifier}/chart"
       description:
         type: string
         example: "Price of stock at start of trading day"
@@ -768,7 +768,7 @@ definitions:
     properties:
       name:
         type: string
-      company_symbol:
+      entity_id:
         type: string
       feature_name:
         type: string

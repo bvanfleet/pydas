@@ -11,7 +11,7 @@ from pydas_auth.scopes import verify_scopes
 
 from pydas_metadata import json
 from pydas_metadata.contexts import BaseContext
-from pydas_metadata.models import Company, Option
+from pydas_metadata.models import Entity, Option
 
 from pydas import constants
 from pydas.clients.iex import IexClient
@@ -77,10 +77,10 @@ def acquire(company_symbol,
                 start_date=datetime.now().isoformat())
 
         with metadata_context.get_session() as session:
-            company = session.query(Company).filter(
-                Company.symbol == company_symbol).one()
+            entity = session.query(Entity).filter(
+                Entity.identifier == company_symbol).one()
 
-            for feature in company.features:
+            for feature in entity.features:
                 if should_handle_events:
                     logging.info(
                         "Signalling pre-feature event handlers")
@@ -105,7 +105,7 @@ def acquire(company_symbol,
                                    "value": "1m"})
 
                 logging.info('Acquiring feature data')
-                data = client.get_feature_data(feature, company, option)
+                data = client.get_feature_data(feature, entity, option)
                 if isinstance(data, list):
                     results[feature.name] = feature.get_values(data)
                 elif isinstance(data, dict):

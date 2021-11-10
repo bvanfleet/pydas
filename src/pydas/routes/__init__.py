@@ -2,7 +2,7 @@
 
 from .acquire import acquire_bp
 from .archives import archives_bp
-from .company import company_bp
+from .entity import entity_bp
 from .configuration import configuration_bp
 from .feature import feature_bp
 from .handler import handler_bp
