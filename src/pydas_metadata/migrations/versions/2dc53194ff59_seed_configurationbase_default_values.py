@@ -22,7 +22,7 @@ configuration = sa.table('ConfigurationBASE',
 
 configurations = [
     {'Id': 1, 'Name': 'apiKey', 'Type': 'str',
-     'ValueTXT': sa.sql.null()},
+     'ValueTXT': None},
     {'Id': 2, 'Name': 'apiUrl', 'Type': 'str',
      'ValueTXT': 'https://cloud.iexapis.com'},
     {'Id': 3, 'Name': 'apiVersion', 'Type': 'str',
@@ -30,7 +30,7 @@ configurations = [
     {'Id': 4, 'Name': 'outputFormat', 'Type': 'str',
      'ValueTXT': 'file'},
     {'Id': 5, 'Name': 'outputFilePath', 'Type': 'str',
-     'ValueTXT': sa.sql.null()},
+     'ValueTXT': None},
     {'Id': 6, 'Name': 'outputFileRowDelimiter', 'Type': 'str',
      'ValueTXT': '\\n'},
     {'Id': 7, 'Name': 'outputFileFieldDelimiter', 'Type': 'str',

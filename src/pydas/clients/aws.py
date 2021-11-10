@@ -7,7 +7,7 @@ from botocore import UNSIGNED
 from botocore.config import Config
 
 from pydas_metadata.contexts.base import BaseContext
-from pydas_metadata.models import Company, Configuration, Feature
+from pydas_metadata.models import Entity, Configuration, Feature
 
 from pydas.clients.base import BaseDataClient
 
@@ -25,8 +25,8 @@ class AwsS3Client(BaseDataClient):
     def can_handle(cls, source: str) -> bool:
         return source.lower() == "aws"
 
-    def get_feature_data(self, feature: Feature, company: Company, options: list):
-        self._fetch_dataset(company.symbol, feature.name)
+    def get_feature_data(self, feature: Feature, entity: Entity, options: list):
+        self._fetch_dataset(entity.identifier, feature.name)
 
     def _fetch_dataset(self, bucket, key):
         objects = self._client.list_objects(Bucket=bucket, Prefix=key)

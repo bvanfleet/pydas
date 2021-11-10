@@ -56,8 +56,8 @@ class Archive(Base):
             Collection of companies associated with this archived dataset.
         '''
         symbols = self.company_symbols.split(',')
-        companies = session.query(models.Company).filter(
-            models.Company.symbol.in_(symbols))
+        companies = session.query(models.Entity).filter(
+            models.Entity.identifier.in_(symbols))
         return companies.all()
 
     def add_company(self, company_symbol: str):

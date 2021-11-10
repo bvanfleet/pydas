@@ -4,7 +4,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from pydas_metadata.models.base import Base
-from pydas_metadata.models.company import Company
+from pydas_metadata.models.entity import Entity
 from pydas_metadata.models.feature import Feature
 
 
@@ -39,7 +39,7 @@ class Statistics(Base):
 
     company_symbol: str = Column('CompanySymbol',
                                  String(10),
-                                 ForeignKey('CompanyBASE.Symbol'),
+                                 ForeignKey('EntityBASE.Identifier'),
                                  primary_key=True)
     feature_name: str = Column('FeatureName',
                                String(50),
@@ -49,7 +49,7 @@ class Statistics(Base):
         'RetrievalDTS', DateTime, primary_key=True)
     row_count: int = Column('RowCount', Integer)
 
-    company: Company = relationship('Company')
+    company: Entity = relationship('Entity')
     feature: Feature = relationship('Feature')
 
     def __json__(self):

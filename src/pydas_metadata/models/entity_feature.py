@@ -3,8 +3,8 @@ from pydas_metadata.models.base import Base
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 
 
-CompanyFeatureMap = Table('CompanyFeatureBASE', Base.metadata,
-                          Column('CompanyFeatureID',
+EntityFeatureMap = Table('EntityFeatureBASE', Base.metadata,
+                          Column('EntityFeatureID',
                                  Integer,
                                  primary_key=True,
                                  autoincrement=True,
@@ -13,7 +13,7 @@ CompanyFeatureMap = Table('CompanyFeatureBASE', Base.metadata,
                                  String(50),
                                  ForeignKey('FeatureBASE.Name'),
                                  nullable=False),
-                          Column('CompanySymbol',
+                          Column('EntityID',
                                  String(50),
-                                 ForeignKey('CompanyBASE.Symbol'),
+                                 ForeignKey('EntityBASE.Identifier'),
                                  nullable=False))

@@ -17,12 +17,12 @@ class DatabaseContext(BaseContext):
                  port: int = 3306):
         db_pass = f':{password}' if password is not None else ''
         self.engine = create_engine(
-            f'mysql://{username}{db_pass}@{hostname}:{port}/{database}')
+            f'mariadb+mariadbconnector://{username}{db_pass}@{hostname}:{port}/{database}')
         session_factory.configure(bind=self.engine)
 
     @classmethod
     def can_handle(cls, context_type) -> bool:
-        return context_type == 'mysql'
+        return context_type == 'mariadb'
 
     @contextmanager
     def get_session(self):

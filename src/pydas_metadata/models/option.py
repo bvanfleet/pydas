@@ -13,7 +13,7 @@ class Option(Base):
         parameters. It is recommended that this name matches the name of
         any query parameters that its value may be associated with.
 
-    company_symbol: str
+    entity_id: str
         Company identifier.
 
     feature_name: str
@@ -35,10 +35,10 @@ class Option(Base):
     _supported_number_types = ['float', 'int', 'decimal']
 
     name: str = Column('Name', String, primary_key=True)
-    company_symbol: str = Column('CompanySymbol', String, ForeignKey(
-        'CompanyFeatureBASE.CompanySymbol'), primary_key=True)
+    entity_id: str = Column('EntityID', String, ForeignKey(
+        'EntityFeatureBASE.EntityID'), primary_key=True)
     feature_name: str = Column('FeatureName', String, ForeignKey(
-        'CompanyFeatureBASE.FeatureName'), primary_key=True)
+        'EntityFeatureBASE.FeatureName'), primary_key=True)
     option_type: str = Column('Type', String, nullable=False)
     value_text: str = Column('ValueTXT', String)
     value_number = Column('ValueNBR', Float)
@@ -79,7 +79,7 @@ class Option(Base):
         """Returns a jsonify-able representation of the feature object."""
         return {
             "name": self.name,
-            "company_symbol": self.company_symbol,
+            "entity_id": self.entity_id,
             "feature_name": self.feature_name,
             "option_type": self.option_type,
             "value": self.value_text,

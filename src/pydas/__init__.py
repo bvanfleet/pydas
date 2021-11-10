@@ -26,7 +26,7 @@ def create_app(config_filename: str = 'pydas.yaml'):
         modules=[errors,
                  routes.acquire,
                  routes.archives,
-                 routes.company,
+                 routes.entity,
                  routes.configuration,
                  routes.feature,
                  routes.handler,
@@ -43,7 +43,7 @@ def create_app(config_filename: str = 'pydas.yaml'):
     # Route registrations
     app.register_blueprint(routes.acquire_bp)
     app.register_blueprint(routes.archives_bp)
-    app.register_blueprint(routes.company_bp)
+    app.register_blueprint(routes.entity_bp)
     app.register_blueprint(routes.configuration_bp)
     app.register_blueprint(routes.feature_bp)
     app.register_blueprint(routes.handler_bp)
@@ -76,4 +76,4 @@ def create_app(config_filename: str = 'pydas.yaml'):
     return app
 
 
-__version__ = "1.3.1"
+__version__ = "2.0.0"

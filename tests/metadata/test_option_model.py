@@ -55,13 +55,13 @@ class TestOption(unittest.TestCase):
         # arrange
         expected_output = {
             "name": "colour",
-            "company_symbol": "F",
+            "entity_id": "F",
             "feature_name": "make",
             "option_type": "str",
             "value": "Black",
             "value_number": None
         }
-        option = Option(company_symbol="F",
+        option = Option(entity_id="F",
                         feature_name="make",
                         name="colour",
                         option_type="str",
